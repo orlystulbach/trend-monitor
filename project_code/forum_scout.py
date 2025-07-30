@@ -33,7 +33,9 @@ def fetch_forumscout_data(endpoint, keyword):
         "X-API-Key": FORUMSCOUT_API_KEY
     }
     params = {
-        "keyword": keyword
+        "keyword": keyword,
+        "sort_by": top
+        # "sort_by": recent
     }
     response = requests.get(url, headers=headers, params=params)
     if response.status_code == 200:

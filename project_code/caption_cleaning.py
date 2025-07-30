@@ -7,6 +7,7 @@ df = pd.read_csv("output/forumscout_data_with_captions.csv")
 
 # Clean captions: lowercase, remove emojis/symbols/extra whitespace
 def clean_caption(text):
+    
     if not isinstance(text, str):
         return ""
     # Remove punctuation except hashtags & mentions

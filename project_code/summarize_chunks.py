@@ -6,8 +6,8 @@ client = openai.OpenAI()
 
 # === CONFIGURATION ===
 INPUT_FILE = "output/forumscout_cleaned_data.csv"
-OUTPUT_FILE = "output/gpt_narrative_summary.md"
-CHUNK_SIZE = 20;
+OUTPUT_FILE = "output/gpt_narrative_summary_2.md"
+CHUNK_SIZE = 30;
 OPENAI_MODEL = "gpt-4"
 
 # === Load and clean data ===
@@ -68,3 +68,4 @@ with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     f.write(summary)
 
 print(f"✅ Narrative summaries saved to {OUTPUT_FILE}")
+
