@@ -1,6 +1,5 @@
 import openai
 import pandas as pd
-import math
 
 client = openai.OpenAI()
 

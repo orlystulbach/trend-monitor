@@ -1,0 +1,7 @@
+tqdm
+pandas
+instaloader
+requests
+openai
+streamlit
+plotly
