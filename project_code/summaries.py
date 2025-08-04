@@ -15,7 +15,7 @@ Your goals are:
 1. **Identify and name each distinct narrative** or theme expressed across the entire dataset.
 2. For each narrative:
    - Write a clear and concise **summary** (2 to 4 sentences) that captures the core idea, tone, and emotional resonance.
-   - Select **3 to 5 example posts** that best illustrate the narrative, choosing from the references included in the original text. Include user, short caption excerpt, and URL.
+   - Select **5 to 10 example posts** that best illustrate the narrative, choosing from the references included in the original text. Include user, short caption excerpt, title excerpt where accessible, and URL.
 3. **Avoid duplication** — merge overlapping or semantically similar narratives into one.
 4. Ensure the output is **structured and readable**, suitable for inclusion in a research report.
 

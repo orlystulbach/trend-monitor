@@ -1,14 +1,20 @@
 import openai
 import pandas as pd
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 client = openai.OpenAI()
 
 def generate_chunked_summaries(
     # === CONFIGURATION ===
-  INPUT_FILE = "output/forumscout_cleaned_data.csv",
-  OUTPUT_FILE = "output/gpt_narrative_summary.md",
+  INPUT_FILE = "output/forumscout_cleaned_data_2.csv",
+  OUTPUT_FILE = "output/gpt_narrative_summary_2.md",
   CHUNK_SIZE = 30,
   OPENAI_MODEL = "gpt-4"
+  # OPENAI_MODEL = "gpt-3_5-turbo-instruct"
 ):
 
   # === Load and clean data ===
@@ -34,7 +40,7 @@ def generate_chunked_summaries(
   Your job is to:
   1. Identify and name distinct narratives or conversation themes.
   2. Write a 2 to 4 sentence summary for each narrative.
-  3. Provide 3 to 4 example posts (include user, short caption excerpt, and URL) that reflect each narrative.
+  3. Provide 5 to 10 example posts (include user, short caption excerpt, and URL) that reflect each narrative.
 
   Here are the posts:
   {formatted}
@@ -71,3 +77,6 @@ def generate_chunked_summaries(
   print(f"✅ Narrative summaries saved to {OUTPUT_FILE}")
   
   return all_summaries
+
+if __name__ == "__main__":
+  generate_chunked_summaries()
