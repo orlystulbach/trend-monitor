@@ -4,7 +4,7 @@ import os
 import requests
 import time
 import csv
-from datetime import datetime
+import datetime
 
 # Base API setup
 FORUMSCOUT_API_KEY = os.getenv("FORUMSCOUT_API_KEY")  # Replace with your real API key
@@ -27,6 +27,10 @@ ENDPOINTS = {
 
 OUTPUT_FILE = "output/forumscout_data.csv"
 
+def get_output_filename():
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"output/forumscout_data_{timestamp}.csv"
+
 def fetch_forumscout_data(endpoint, keyword):
     url = f"{BASE_URL}/{endpoint}"
     headers = {
@@ -34,7 +38,6 @@ def fetch_forumscout_data(endpoint, keyword):
     }
     params = {
         "keyword": keyword,
-        "sort_by": top
         # "sort_by": recent
     }
     response = requests.get(url, headers=headers, params=params)
@@ -56,32 +59,50 @@ def normalize_result(post, platform, keyword):
     }
 
 
-def write_to_csv(records):
+def write_to_csv(records, output_file):
     if not records:
+        print("No records to write.")
         return
+
     keys = records[0].keys()
-    with open(OUTPUT_FILE, "a", newline="") as f:
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    with open(output_file, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=keys)
         if f.tell() == 0:
             writer.writeheader()
         writer.writerows(records)
 
-
-def run_ingestion():
+def run_ingestion(keywords, endpoints, output_file="output/forumscout_data.csv"):
     all_records = []
-    for platform, endpoint in ENDPOINTS.items():
-        for keyword in KEYWORDS:
-            print(f"Fetching {keyword} from {platform}...")
+
+    for platform, endpoint in endpoints.items():
+        for keyword in keywords:
+            print(f"🔎 Fetching '{keyword}' from {platform}...")
             posts = fetch_forumscout_data(endpoint, keyword)
             normalized = [normalize_result(p, platform, keyword) for p in posts]
             all_records.extend(normalized)
-            time.sleep(1)  # Rate limit spacing
+            time.sleep(1)  # avoid rate limits
 
-    write_to_csv(all_records)
-    print(f"Ingested {len(all_records)} records.")
+    write_to_csv(all_records, output_file)
+    print(f"✅ Ingested {len(all_records)} records into {output_file}.")
+
+
+# def run_ingestion():
+#     all_records = []
+#     for platform, endpoint in ENDPOINTS.items():
+#         for keyword in KEYWORDS:
+#             print(f"Fetching {keyword} from {platform}...")
+#             posts = fetch_forumscout_data(endpoint, keyword)
+#             normalized = [normalize_result(p, platform, keyword) for p in posts]
+#             all_records.extend(normalized)
+#             time.sleep(1)  # Rate limit spacing
+
+#     write_to_csv(all_records)
+#     print(f"Ingested {len(all_records)} records.")
 
 
 if __name__ == "__main__":
     import os
     os.makedirs("output", exist_ok=True)
-    run_ingestion()
+    run_ingestion(KEYWORDS, ENDPOINTS)
