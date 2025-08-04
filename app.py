@@ -5,7 +5,11 @@ from project_code.caption_cleaning import clean_captions_file
 from project_code.summarize_chunks import generate_chunked_summaries
 from project_code.summaries import synthesize_final_narratives
 
-st.title("Instagram Trend Analyzer")
+st.set_page_config(
+    page_title="Instagram Narrative Analysis Tool",
+    page_icon="📱",
+    layout="wide"
+)
 
 st.markdown("Enter keywords you'd like to search on Instagram via ForumScout:")
 user_input = st.text_area("Keywords (comma-separated)")
@@ -27,7 +31,7 @@ if st.button("🧲 Scrape Posts"):
         st.success("Done scraping posts!")
 
         with open("output/forumscout_data.csv") as f:
-            st.download_button("📄 Download Data CSV", f, file_name="forumscout_data.csv")
+            st.download_button(st.download_button("📄 Download Data CSV", f, file_name="forumscout_data.csv",key="download_raw_data"))
     
     input_file_data = "output/forumscout_data.csv"
     output_file_data = "output/forumscout_data_with_captions.csv"
@@ -39,7 +43,7 @@ if st.button("🧲 Scrape Posts"):
             st.success("Done scraping captions!")
             
             with open(output_file_data, "rb") as f:
-                st.download_button("📄 Download Captions CSV", f, file_name="forumscout_data_with_captions.csv")
+                st.download_button("📄 Download Captions CSV", f, file_name="forumscout_data_with_captions.csv", key="download_captions")
         except Exception as e:
             st.error(f"Error: {e}")
     
@@ -53,7 +57,7 @@ if st.button("🧲 Scrape Posts"):
             st.success(f"Done cleaning captions!")
 
             with open(output_file_clean, "rb") as f:
-                st.download_button("📄 Download Cleaned CSV", f, file_name="forumscout_cleaned_data.csv")
+                st.download_button("📄 Download Cleaned CSV", f, file_name="forumscout_cleaned_data.csv", key="download_clean_data")
 
         except Exception as e:
             st.error(f"Error cleaning captions: {e}")
@@ -78,7 +82,7 @@ if st.button("🧲 Scrape Posts"):
             st.text_area("", summary, height=300)
     
     with open(output_file_clean, "rb") as f:
-        st.download_button("📄 Download Chunk Summaries", f, file_name="output/gpt_narrative_summary.md")
+        st.download_button("📄 Download Chunk Summaries", f, file_name="output/gpt_narrative_summary.md", key="download_chunks")
 
 # if st.button("🧩 Synthesize Final Narratives"):
     try:
@@ -94,7 +98,7 @@ if st.button("🧲 Scrape Posts"):
             f.write(final_output)
 
         st.success("Final synthesis complete!")
-        st.download_button("📄 Download Final Narrative Summary", final_output, file_name="output/final_narratives.md")
+        st.download_button("📄 Download Final Narrative Summary", final_output, file_name="output/final_narratives.md", key="download_summary")
 
         st.markdown("### 📝 Final Narrative Output")
         st.markdown(final_output)
