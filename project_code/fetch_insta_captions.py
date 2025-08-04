@@ -92,3 +92,7 @@ def enrich_instagram_captions(input_file, output_file):
     # st.success(f"✅ Captions added to {output_file}")
     
     print(f"✅ Captions added. Enriched data saved to {output_file}")
+
+
+if __name__ == "__main__":
+    enrich_instagram_captions("output/forumscout_data_2.csv", "output/forumscout_data_with_captions_2.csv")

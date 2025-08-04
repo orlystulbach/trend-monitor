@@ -81,3 +81,8 @@ def clean_captions_file(input_file, output_file, st=None):
     df.to_csv(output_file, index=False, encoding="utf-8-sig")
     # if st:
     #     st.success(f"✅ Cleaned captions saved to {output_file}")
+
+if __name__ == "__main__":
+    input_file = "output/forumscout_data_with_captions_2.csv"
+    output_file = "output/forumscout_cleaned_data_2.csv"
+    clean_captions_file(input_file, output_file)
