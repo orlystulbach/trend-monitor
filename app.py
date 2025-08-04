@@ -4,7 +4,6 @@ from project_code.fetch_insta_captions import enrich_instagram_captions
 from project_code.caption_cleaning import clean_captions_file
 from project_code.summarize_chunks import generate_chunked_summaries
 from project_code.summaries import synthesize_final_narratives
-from project_code.display_final_narratives import display_final_narratives
 
 st.title("Instagram Trend Analyzer")
 
