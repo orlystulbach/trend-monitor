@@ -8,3 +8,4 @@ plotly
 dotenv
 apify-client
 yt_dlp
+bs4
