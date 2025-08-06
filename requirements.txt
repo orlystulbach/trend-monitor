@@ -6,3 +6,4 @@ openai
 streamlit
 plotly
 dotenv
+apify-client
