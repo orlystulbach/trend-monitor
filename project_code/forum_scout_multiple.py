@@ -6,7 +6,6 @@ import time
 import csv
 import datetime
 from dotenv import load_dotenv
-from config import message_queue
 from utils.logger import log_to_browser
 
 # Load environment variables
