@@ -10,8 +10,8 @@ client = openai.OpenAI()
 
 def generate_chunked_summaries(
     # === CONFIGURATION ===
-  INPUT_FILE = "output/forumscout_cleaned_data_2.csv",
-  OUTPUT_FILE = "output/gpt_narrative_summary_2.md",
+  INPUT_FILE = "output/forumscout_cleaned_data.csv",
+  OUTPUT_FILE = "output/gpt_narrative_summary.md",
   CHUNK_SIZE = 30,
   OPENAI_MODEL = "gpt-4"
   # OPENAI_MODEL = "gpt-3_5-turbo-instruct"
@@ -26,6 +26,7 @@ def generate_chunked_summaries(
 
   # Generator function: yields slices of post list
   def chunk_posts(posts, size):
+    
     for i in range(0, len(posts), size):
       yield posts[i:i + size]
     
@@ -40,7 +41,7 @@ def generate_chunked_summaries(
   Your job is to:
   1. Identify and name distinct narratives or conversation themes.
   2. Write a 2 to 4 sentence summary for each narrative.
-  3. Provide 5 to 10 example posts (include user, short caption excerpt, and URL) that reflect each narrative.
+  3. Provide 5 to 10 example posts that reflect each narrative, and ALWAYS make sure to include the user, short caption excerpt, and the post URL (super important to include the URL!)!!!
 
   Here are the posts:
   {formatted}
@@ -70,6 +71,7 @@ def generate_chunked_summaries(
 
   # === Save output ===
   with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    print('len all summaries', len(all_summaries))
     for i, summary in enumerate(all_summaries):
       f.write(f"\n\n## Summary Chunk {i+1}\n\n")
       f.write(summary)

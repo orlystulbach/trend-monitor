@@ -21,13 +21,13 @@ if 'final_narratives' not in st.session_state:
     st.session_state.final_narratives = ""
 
 st.set_page_config(
-    page_title="Instagram Narrative Analysis Tool",
+    page_title="Narrative Analysis Tool",
     page_icon="📱",
     layout="wide"
 )
 
-st.title("📱 Instagram Narrative Analysis Tool")
-st.markdown("Enter keywords you'd like to search on Instagram via ForumScout:")
+st.title("📱 Narrative Analysis Tool")
+st.markdown("Enter keywords you'd like to search:")
 user_input = st.text_area("Keywords (comma-separated)")
 
 # endpoints = st.multiselect(
@@ -40,6 +40,7 @@ platform_options = {
     "YouTube": "youtube_search",
     "Reddit Posts": "reddit_posts_search",
     "Reddit Comments": "reddit_comments_search",
+    "TikTok": 'tiktok',
 }
 
 selected_platforms = st.multiselect(
@@ -47,11 +48,19 @@ selected_platforms = st.multiselect(
     list(platform_options.keys())
 )
 
+print(selected_platforms)
+
+chunk_count = 1
+
+if st.button("tell me what i clicked"):
+    selected_platforms
+
 # Step 1: Scrape data
 if st.button("🧲 Scrape Posts"):
     keywords = [kw.strip() for kw in user_input.split(",") if kw.strip()]
     
     log_to_browser(f"Scraping {keywords} from {selected_platforms}")
+
     # endpoints = {
     #     "instagram": "instagram_search",
     #     # "twitter": "x_search",
@@ -61,6 +70,7 @@ if st.button("🧲 Scrape Posts"):
     #     # "linkedin": "linkedin_search",
     # # Add more as supported
     # }
+
     if not keywords:
         st.warning("Please enter at least one keyword.")
     elif not selected_platforms:
@@ -80,9 +90,13 @@ if st.button("🧲 Scrape Posts"):
 
         with col1:
             st.info("Scraping posts...")
-            run_ingestion(keywords=keywords, endpoints=endpoints)
-            st.session_state.scraping_complete = True
-            st.success("Done scraping posts!")
+            try: 
+                print('endpoints', endpoints)
+                run_ingestion(keywords=keywords, endpoints=endpoints)
+                st.session_state.scraping_complete = True
+                st.success("Done scraping posts!")
+            except Exception as e:
+                st.error(f"Error: {e}")
 
         with col2: 
             st.info("Scraping captions...")
@@ -107,31 +121,35 @@ if st.button("🧲 Scrape Posts"):
                 st.error(f"Error cleaning captions: {e}")
 
         # Generate summaries
-        # with st.spinner("Generating summaries from Instagram captions..."):
-        #     summaries = generate_chunked_summaries()
-        #     st.session_state.summaries = summaries
-        
-        # st.success("Chunked summaries generated!")
+        with st.spinner("Generating summaries from content..."):
+            try: 
+                summaries = generate_chunked_summaries()
+                chunk_count = len(summaries)
+                st.session_state.summaries = summaries
+                st.success("Chunked summaries generated!")
+            except Exception as e:
+                st.error(f"Error generating summaries by chunk: {e}")
 
         # Generate final narratives
-        # try:
-        #     with open("output/gpt_narrative_summary.md", "r", encoding="utf-8") as f:
-        #         all_chunks_text = f.read()
+        try:
+            all_chunks_text = ''
+            with open("output/gpt_narrative_summary.md", "r", encoding="utf-8") as f:
+                all_chunks_text = f.read()
 
-        #     with st.spinner("Analyzing summaries and generating final narratives..."):
-        #         final_output = synthesize_final_narratives(all_chunks_text)
-        #         st.session_state.final_narratives = final_output
+            with st.spinner("Analyzing summaries and generating final narratives..."):
+                final_output = synthesize_final_narratives(all_chunks_text)
+                st.session_state.final_narratives = final_output
             
-        #     with open("output/final_narratives.md", "w", encoding="utf-8") as f:
-        #         f.write(final_output)
+            with open("output/final_narratives.md", "w", encoding="utf-8") as f:
+                f.write(final_output)
 
-        #     st.session_state.analysis_complete = True
-        #     st.success("Analysis complete!")
+            st.session_state.analysis_complete = True
+            st.success("Analysis complete!")
 
-        # except FileNotFoundError:
-        #     st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
-        # except Exception as e:
-        #     st.error(f"Unexpected error: {e}")
+        except FileNotFoundError:
+            st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
+        except Exception as e:
+            st.error(f"Unexpected error: {e}")
 
 # Show download buttons and results if scraping is complete
 if st.session_state.scraping_complete:
@@ -181,7 +199,7 @@ if st.session_state.cleaning_complete:
 if st.session_state.summaries:
     st.subheader("🧠 Generated Summaries")
     
-    if len(st.session_state.summaries) > 1:
+    if chunk_count > 1:
         for i, summary in enumerate(st.session_state.summaries, start=1):
             st.markdown(f"### Chunk Summary {i}")
             st.text_area("", summary, height=300, key=f"summary_{i}")
@@ -216,104 +234,104 @@ if st.session_state.analysis_complete:
     st.markdown(st.session_state.final_narratives)
 
     # Extract and display example posts (same logic as before)
-    st.subheader("📱 Posts Referenced in Analysis")
-    st.markdown("*These are the specific Instagram posts that were used as examples in the narrative analysis above.*")
+    # st.subheader("📱 Posts Referenced in Analysis")
+    # st.markdown("*These are the specific Instagram posts that were used as examples in the narrative analysis above.*")
     
-    try:
-        import pandas as pd
-        import re
+    # try:
+    #     import pandas as pd
+    #     import re
         
-        # Load the cleaned data to find example posts
-        df_results = pd.read_csv("output/forumscout_cleaned_data.csv")
-        narratives_text = st.session_state.final_narratives
+    #     # Load the cleaned data to find example posts
+    #     df_results = pd.read_csv("output/forumscout_cleaned_data.csv")
+    #     narratives_text = st.session_state.final_narratives
         
-        # Find all post examples mentioned in the narratives
-        patterns = [
-            r'@(\w+):\s*["""]([^"""]+)["""]',  # @user: "caption"
-            r'@(\w+)\s*-\s*["""]([^"""]+)["""]',  # @user - "caption"
-            r'@(\w+):\s*"([^"]+)"',  # @user: "caption"
-            r'@(\w+)\s*-\s*"([^"]+)"'  # @user - "caption"
-        ]
+    #     # Find all post examples mentioned in the narratives
+    #     patterns = [
+    #         r'@(\w+):\s*["""]([^"""]+)["""]',  # @user: "caption"
+    #         r'@(\w+)\s*-\s*["""]([^"""]+)["""]',  # @user - "caption"
+    #         r'@(\w+):\s*"([^"]+)"',  # @user: "caption"
+    #         r'@(\w+)\s*-\s*"([^"]+)"'  # @user - "caption"
+    #     ]
         
-        example_posts = []
-        found_examples = set()  # To avoid duplicates
+    #     example_posts = []
+    #     found_examples = set()  # To avoid duplicates
         
-        for pattern in patterns:
-            matches = re.findall(pattern, narratives_text, re.IGNORECASE)
-            for username, caption_excerpt in matches:
-                # Skip if we already found this example
-                key = f"{username.lower()}:{caption_excerpt[:30]}"
-                if key in found_examples:
-                    continue
-                found_examples.add(key)
+    #     for pattern in patterns:
+    #         matches = re.findall(pattern, narratives_text, re.IGNORECASE)
+    #         for username, caption_excerpt in matches:
+    #             # Skip if we already found this example
+    #             key = f"{username.lower()}:{caption_excerpt[:30]}"
+    #             if key in found_examples:
+    #                 continue
+    #             found_examples.add(key)
                 
-                # Find the matching post in our data
-                matching_posts = df_results[
-                    df_results['author'].str.lower() == username.lower()
-                ]
+    #             # Find the matching post in our data
+    #             matching_posts = df_results[
+    #                 df_results['author'].str.lower() == username.lower()
+    #             ]
                 
-                # If multiple posts from same user, try to find the one with matching content
-                if len(matching_posts) > 1:
-                    content_matches = matching_posts[
-                        matching_posts['caption'].str.contains(caption_excerpt[:20], case=False, na=False) |
-                        matching_posts['cleaned_caption'].str.contains(caption_excerpt[:20], case=False, na=False)
-                    ]
-                    if not content_matches.empty:
-                        matching_posts = content_matches
+    #             # If multiple posts from same user, try to find the one with matching content
+    #             if len(matching_posts) > 1:
+    #                 content_matches = matching_posts[
+    #                     matching_posts['caption'].str.contains(caption_excerpt[:20], case=False, na=False) |
+    #                     matching_posts['cleaned_caption'].str.contains(caption_excerpt[:20], case=False, na=False)
+    #                 ]
+    #                 if not content_matches.empty:
+    #                     matching_posts = content_matches
                 
-                if not matching_posts.empty:
-                    post = matching_posts.iloc[0]
-                    example_posts.append(post)
+    #             if not matching_posts.empty:
+    #                 post = matching_posts.iloc[0]
+    #                 example_posts.append(post)
         
-        # Display the example posts
-        if example_posts:
-            for i, post in enumerate(example_posts, 1):
-                st.markdown(f"**Example {i}:**")
+    #     # Display the example posts
+    #     if example_posts:
+    #         for i, post in enumerate(example_posts, 1):
+    #             st.markdown(f"**Example {i}:**")
                 
-                # User handle
-                st.markdown(f"**User:** @{post['author']}")
+    #             # User handle
+    #             st.markdown(f"**User:** @{post['author']}")
                 
-                # Caption
-                caption = post['caption'] if pd.notna(post['caption']) else post['content']
-                if caption:
-                    st.markdown(f"**Caption:** {caption}")
-                else:
-                    st.markdown("**Caption:** *No caption available*")
+    #             # Caption
+    #             caption = post['caption'] if pd.notna(post['caption']) else post['content']
+    #             if caption:
+    #                 st.markdown(f"**Caption:** {caption}")
+    #             else:
+    #                 st.markdown("**Caption:** *No caption available*")
                 
-                # URL
-                if post['url']:
-                    st.markdown(f"**URL:** {post['url']}")
-                else:
-                    st.markdown("**URL:** *No URL available*")
+    #             # URL
+    #             if post['url']:
+    #                 st.markdown(f"**URL:** {post['url']}")
+    #             else:
+    #                 st.markdown("**URL:** *No URL available*")
                 
-                st.markdown("---")
+    #             st.markdown("---")
         
-        else:
-            st.info("No specific post examples were found in the narrative text.")
+    #     else:
+    #         st.info("No specific post examples were found in the narrative text.")
             
-            # Fallback: show some sample posts from the analysis
-            st.markdown("**Sample posts from the analysis:**")
-            sample_posts = df_results[df_results['caption'].str.len() > 20].head(3)
+    #         # Fallback: show some sample posts from the analysis
+    #         st.markdown("**Sample posts from the analysis:**")
+    #         sample_posts = df_results[df_results['caption'].str.len() > 20].head(3)
             
-            for i, (idx, post) in enumerate(sample_posts.iterrows(), 1):
-                st.markdown(f"**Sample {i}:**")
-                st.markdown(f"**User:** @{post['author']}")
+    #         for i, (idx, post) in enumerate(sample_posts.iterrows(), 1):
+    #             st.markdown(f"**Sample {i}:**")
+    #             st.markdown(f"**User:** @{post['author']}")
                 
-                caption = post['caption'] if pd.notna(post['caption']) else post['content']
-                if caption:
-                    st.markdown(f"**Caption:** {caption}")
-                else:
-                    st.markdown("**Caption:** *No caption available*")
+    #             caption = post['caption'] if pd.notna(post['caption']) else post['content']
+    #             if caption:
+    #                 st.markdown(f"**Caption:** {caption}")
+    #             else:
+    #                 st.markdown("**Caption:** *No caption available*")
                 
-                if post['url']:
-                    st.markdown(f"**URL:** {post['url']}")
-                else:
-                    st.markdown("**URL:** *No URL available*")
+    #             if post['url']:
+    #                 st.markdown(f"**URL:** {post['url']}")
+    #             else:
+    #                 st.markdown("**URL:** *No URL available*")
                 
-                st.markdown("---")
+    #             st.markdown("---")
     
-    except Exception as e:
-        st.error(f"Error displaying example posts: {e}")
+    # except Exception as e:
+    #     st.error(f"Error displaying example posts: {e}")
 
 # Reset button to start over
 if st.session_state.analysis_complete or st.session_state.scraping_complete:

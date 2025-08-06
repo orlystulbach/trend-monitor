@@ -123,6 +123,8 @@ def enrich_captions(input_file, output_file):
                 row["caption"] = comment_text
             # elif row["platform"] == "twitter" and row["url"]:
             #     fetch_tweet_text(row["url"])
+            elif row["platform"] == "tiktok" and row["content"]:
+                row["caption"] = row["content"]
             else:
                 row["caption"] = ""
             writer.writerow(row)
@@ -132,7 +134,6 @@ def enrich_captions(input_file, output_file):
     
     log_to_browser("Caption enrichment complete!")
     print(f"✅ Captions added. Enriched data saved to {output_file}")
-
 
 if __name__ == "__main__":
     enrich_captions("output/forumscout_data.csv", "output/forumscout_data_with_captions.csv")
