@@ -6,7 +6,7 @@ import time
 import csv
 import datetime
 from dotenv import load_dotenv
-# from utils.logger import log_to_browser
+from utils.logger import log_to_browser
 from project_code.fetch_tiktok_data import scrape_tiktok_data
 import pandas as pd
 
@@ -18,10 +18,7 @@ FORUMSCOUT_API_KEY = os.getenv("FORUMSCOUT_API_KEY")
 APIFY_CLIENT_TOKEN = os.getenv("APIFY_CLIENT_TOKEN")
 BASE_URL = "https://forumscout.app/api"
 
-# Keywords and endpoints to track
-# Endpoints found here: https://forumscout.app/developers 
-# KEYWORDS = ["zionism"]
-
+# ForumScout Endpoints found here: https://forumscout.app/developers 
 # ENDPOINTS = {
 #     # "twitter": "x_search",
 #     # "reddit_posts": "reddit_posts_search",
@@ -30,11 +27,8 @@ BASE_URL = "https://forumscout.app/api"
 #     # "linkedin": "linkedin_search",
 #     # "youtube" "youtube_search",
 #     "instagram": "instagram_search",
-#     # Add more as supported
 #     "tiktok": "tiktok"
 # }
-
-OUTPUT_FILE = "output/forumscout_data.csv"
 
 def fetch_forumscout_data(endpoint, keyword):
     url = f"{BASE_URL}/{endpoint}"
@@ -47,13 +41,18 @@ def fetch_forumscout_data(endpoint, keyword):
     }
     response = requests.get(url, headers=headers, params=params)
     if response.status_code == 200:
+        print(f"Fetched {keyword} from {endpoint}!")
+        # log_to_browser(f"Fetched {keyword} from {endpoint}!")
         return response.json()
     else:
         print(f"Error fetching {keyword} from {endpoint}: {response.status_code}")
+        # log_to_browser(f"Error fetching {keyword} from {endpoint}: {response.status_code}")
         return []
 
 
 def normalize_result(post, platform, keyword):
+    print(f"Normalizing result for {post} from {platform} with keyword {keyword}")
+    # log_to_browser(f"Normalizing result for {post.get("url")} from {platform} with keyword {keyword}")
     return {
         "platform": platform,
         "keyword": keyword,
@@ -63,23 +62,10 @@ def normalize_result(post, platform, keyword):
         "url": post.get("url") or post.get("link") or ""
     }
 
-def normalize_tiktok_result(item, keyword):
-    return {
-        #  for item in dataset_items:
-        #   writer.writerow({
-        "platform": "tiktok",
-        "keyword": keyword,
-        "content": item.get("text", ""),  # video description/caption
-        "author": item.get("authorMeta.name", {}).get("name", ""),  # username
-        "timestamp": item.get("createTimeISO", ""),  # ISO timestamp
-        "url": item.get("webVideoUrl", ""),  # video URL
-        #   })
-    }
-
-
 def write_to_csv(records, output_file):
     if not records:
         print("No records to write.")
+        # log_to_browser(f"No records to write to {output_file}")
         return
 
     keys = records[0].keys()
@@ -90,17 +76,25 @@ def write_to_csv(records, output_file):
         if f.tell() == 0:
             writer.writeheader()
         writer.writerows(records)
+        print(f"Successfully added records to {output_file}")
+        # log_to_browser(f"Successfully added records to {output_file}")
+
+def safe_read_csv(path):
+    try:
+        if os.path.getsize(path) > 0:
+            return pd.read_csv(path)
+    except Exception:
+        pass
+    return None  # return None if file is empty or invalid
 
 def run_ingestion(keywords, endpoints, output_file="output/forumscout_data.csv"):
     all_records = []
     temp_file = 'output/forumscout_data_temp.csv'
+    open("output/tiktok_data.csv", "w").close() # Clears tiktok file
 
     for platform, endpoint in endpoints.items():
         if platform == 'tiktok':
-                scrape_tiktok_data(APIFY_CLIENT_TOKEN, keywords)
-                # normalized = [normalize_tiktok_result(p, keyword) for p in posts]
-                # all_records.extend(normalized)
-                # log_to_browser(f"🔎 Fetching '{keyword}' from {platform}...")
+            scrape_tiktok_data(APIFY_CLIENT_TOKEN, keywords)
         else:
             for keyword in keywords:
                 print(f"🔎 Fetching '{keyword}' from {platform}...")
@@ -112,33 +106,27 @@ def run_ingestion(keywords, endpoints, output_file="output/forumscout_data.csv")
 
     open(temp_file, "w").close() # Clears temp file
     open(output_file, "w").close() # Clears output file
-    open("output/tiktok_data.csv", "w").close() # Clears tiktok file
     
     write_to_csv(all_records, temp_file) 
     
-    df1 = pd.read_csv(temp_file)
-    df2 = pd.read_csv("output/tiktok_data.csv")
-    combined_df = pd.concat([df1,df2], ignore_index=True)
+    # Read both files safely
+    df1 = safe_read_csv(temp_file)
+    df2 = safe_read_csv("output/tiktok_data.csv")
 
-    # Save to a new file
-    combined_df.to_csv(output_file, index=False)
+    # Determine what to save as output
+    if df1 is not None and df2 is not None:
+        combined_df = pd.concat([df1, df2], ignore_index=True)
+        combined_df.to_csv(output_file, index=False)
+        print("✅ Both files had content. Merged and saved.")
+    elif df1 is not None:
+        df1.to_csv(output_file, index=False)
+        print("✅ Only temp_file had content. Saved as output.")
+    elif df2 is not None:
+        df2.to_csv(output_file, index=False)
+        print("✅ Only tiktok_data.csv had content. Saved as output.")
 
-    print(f"✅ Ingested {len(pd.read_csv(output_file))} records into {output_file}.")
-
-
-# def run_ingestion():
-#     all_records = []
-#     for platform, endpoint in ENDPOINTS.items():
-#         for keyword in KEYWORDS:
-#             print(f"Fetching {keyword} from {platform}...")
-#             posts = fetch_forumscout_data(endpoint, keyword)
-#             normalized = [normalize_result(p, platform, keyword) for p in posts]
-#             all_records.extend(normalized)
-#             time.sleep(1)  # Rate limit spacing
-
-#     write_to_csv(all_records)
-#     print(f"Ingested {len(all_records)} records.")
-
+    print(f"✅ Ingested records into {output_file}.")
+    # log_to_browser(f"✅ Ingested {len(pd.read_csv(output_file))} records into {output_file}.")
 
 # if __name__ == "__main__":
 #     import os

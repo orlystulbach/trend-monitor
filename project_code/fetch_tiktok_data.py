@@ -1,9 +1,6 @@
 from apify_client import ApifyClient
 import csv
-import os
-
-# Define the keyword you're scraping for (to include in CSV)
-# keyword = "jewish"
+from utils.logger import log_to_browser
 
 def scrape_tiktok_data(apify_token, keywords: list, output_file = 'output/tiktok_data.csv'):
   # Initialize the ApifyClient with your API token
@@ -42,7 +39,11 @@ def scrape_tiktok_data(apify_token, keywords: list, output_file = 'output/tiktok
                   "timestamp": item.get("createTimeISO", ""),  # ISO timestamp
                   "url": item.get("webVideoUrl", ""),  # video URL
               })
-        
+
+          print(f"Added {item} to {output_file}")
+
         except Exception as e:
           print(f"❌ Error scraping keyword '{keyword}': {e}")
-
+      
+      # print(f"Added {len(dataset_items)} to {output_file}")
+      # log_to_browser(f"Added {len(dataset_items)} to {output_file}")

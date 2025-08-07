@@ -9,13 +9,14 @@ from bs4 import BeautifulSoup
 # import snscrape.modules.twitter as sntwitter
 from utils.logger import log_to_browser
 
+# For Instaloader, need to extract shortcode from URL
 def extract_shortcode(url):
     match = re.search(r"/p/([A-Za-z0-9_-]+)", url)
     return match.group(1) if match else None
 
 def fetch_instagram_captions(shortcode, loader):
     try:
-        log_to_browser(f"Fetching Instagram caption for {shortcode}")
+        # log_to_browser(f"Fetching Instagram caption for {shortcode}")
         post = instaloader.Post.from_shortcode(loader.context, shortcode)
         return post.caption
     except Exception as e:
@@ -26,7 +27,7 @@ def fetch_youtube_title(shortcode):
     try:
         with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
             info_dict = ydl.extract_info(shortcode, download=False)
-            log_to_browser(f"Fetching YouTube caption for {shortcode}")
+            # log_to_browser(f"Fetching YouTube caption for {shortcode}")
             return info_dict.get('title', 'N/A')
     except Exception as e:
         print(f"Failed to fetch title for {shortcode}: {e}")
@@ -37,7 +38,7 @@ def fetch_reddit_post(url):
         url = url.rstrip("/") + ".json"
     headers = {'User-Agent': 'trend-monitor/0.1'}
     try:
-        log_to_browser(f"Fetching Reddit post for {url}")
+        # log_to_browser(f"Fetching Reddit post for {url}")
         response = requests.get(url, headers=headers)
         data = response.json()
         post = data[0]['data']['children'][0]['data']
@@ -53,7 +54,7 @@ def fetch_reddit_comment(url):
         url = url.rstrip("/") + ".json"
     headers = {'User-Agent': 'trend-monitor/0.1'}
     try: 
-        log_to_browser(f"Fetching Reddit comment from {url}")
+        # log_to_browser(f"Fetching Reddit comment from {url}")
         response = requests.get(url, headers=headers)
         data = response.json()
 
@@ -78,34 +79,31 @@ def fetch_reddit_comment(url):
 #     print('tweet id', tweet_id)
 
 def enrich_captions(input_file, output_file):
-    log_to_browser(f"Enriching captions from {input_file} to {output_file}")
+    print(f"Enriching captions from {input_file} to {output_file}")
+    # log_to_browser(f"Enriching captions from {input_file} to {output_file}")
+
     # Initialize Instaloader only once
     L = instaloader.Instaloader()
 
     if not os.path.exists(input_file):
         raise FileNotFoundError(f"Input file not found: {input_file}")
 
+    # 🔁 First pass: count total rows
+    with open(input_file, newline='', encoding='utf-8') as f:
+        total = sum(1 for _ in csv.DictReader(f))
+
+    # Second pass: use total number of rows
     with open(input_file, newline='', encoding='utf-8') as infile, open(output_file, 'w', newline='', encoding='utf-8') as outfile:
         reader = csv.DictReader(infile)
-        # reader_list = list(reader)
+        # reader_list = list(csv.DictReader(infile))
         fieldnames = reader.fieldnames + ["caption"] + ["body"]
         writer = csv.DictWriter(outfile, fieldnames=fieldnames)
         writer.writeheader()
+        # rows = list(reader)
+        # total = len(rows)
 
-        # for row in reader:
-        #     if row["platform"] == "instagram" and row["url"]:
-        #         shortcode = extract_shortcode(row["url"])
-        #         if shortcode:
-        #             caption = fetch_caption(shortcode, L)
-        #             row["caption"] = caption
-        #         else:
-        #             row["caption"] = ""
-        #     else:
-        #         row["caption"] = ""
-        #     writer.writerow(row)
-        # Streamlit progress bar
-        # total = len(reader_list)
-        # progress = st.progress(0) if st else None
+        progress_text = "Scraping captions now. Please be patient."
+        progress_bar = st.progress(0, text=progress_text)
 
         for i, row in enumerate(reader):
             if row["platform"] == "instagram" and row["url"]:
@@ -118,7 +116,7 @@ def enrich_captions(input_file, output_file):
                 row["caption"] = title
                 row["body"] = body
             elif row["platform"] == "reddit_comments" and row["url"]:
-                comment_text, author = fetch_reddit_post(row["url"])
+                comment_text, author = fetch_reddit_comment(row["url"])
                 row["author"] = author
                 row["caption"] = comment_text
             # elif row["platform"] == "twitter" and row["url"]:
@@ -129,11 +127,10 @@ def enrich_captions(input_file, output_file):
                 row["caption"] = ""
             writer.writerow(row)
 
-            # if progress:
-            #     progress.progress((i + 1) / total)
+            progress_bar.progress((i + 1) / total, text=f"Processing {i+1} of {total}")
     
-    log_to_browser("Caption enrichment complete!")
-    print(f"✅ Captions added. Enriched data saved to {output_file}")
+        # log_to_browser("Caption enrichment complete!")
+        print(f"✅ Captions added. Enriched data saved to {output_file}")
 
 if __name__ == "__main__":
     enrich_captions("output/forumscout_data.csv", "output/forumscout_data_with_captions.csv")

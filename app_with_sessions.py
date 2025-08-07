@@ -30,17 +30,13 @@ st.title("📱 Narrative Analysis Tool")
 st.markdown("Enter keywords you'd like to search:")
 user_input = st.text_area("Keywords (comma-separated)")
 
-# endpoints = st.multiselect(
-#     "Which platforms would you like to explore?",
-#     ["Instagram", "YouTube", "Reddit Posts", "Reddit Comments"],
-# )
-
 platform_options = {
     "Instagram": "instagram_search",
     "YouTube": "youtube_search",
     "Reddit Posts": "reddit_posts_search",
     "Reddit Comments": "reddit_comments_search",
     "TikTok": 'tiktok',
+    "Twitter": "x_search",
 }
 
 selected_platforms = st.multiselect(
@@ -48,28 +44,13 @@ selected_platforms = st.multiselect(
     list(platform_options.keys())
 )
 
-print(selected_platforms)
-
 chunk_count = 1
-
-if st.button("tell me what i clicked"):
-    selected_platforms
 
 # Step 1: Scrape data
 if st.button("🧲 Scrape Posts"):
     keywords = [kw.strip() for kw in user_input.split(",") if kw.strip()]
     
-    log_to_browser(f"Scraping {keywords} from {selected_platforms}")
-
-    # endpoints = {
-    #     "instagram": "instagram_search",
-    #     # "twitter": "x_search",
-    #     "reddit_posts": "reddit_posts_search",
-    #     "reddit_comments": "reddit_comments_search",
-    #     "youtube": "youtube_search",
-    #     # "linkedin": "linkedin_search",
-    # # Add more as supported
-    # }
+    # log_to_browser(f"Scraping {keywords} from {selected_platforms}")
 
     if not keywords:
         st.warning("Please enter at least one keyword.")
@@ -82,74 +63,115 @@ if st.button("🧲 Scrape Posts"):
             for platform in selected_platforms
         }
     
-        print(f"plan to scrape {keywords} from {endpoints.keys()}")
-        log_to_browser(f"Scraping {keywords} from {endpoints.keys()}")
+        print(f"Scraping {keywords} from {endpoints.keys()}")
+        # log_to_browser(f"Scraping {keywords} from {endpoints.keys()}")
 
-# if st.button('dont click'):
+        # st.markdown("""
+        # <style>
+        #     .stProgress > div > div > div > div {
+        #         margin-bottom: 0rem !important;
+        #     }
+        #     .element-container {
+        #         margin-bottom: 0rem !important;
+        #     }
+        #     div[data-testid="stVerticalBlock"] > div:empty {
+        #         display: none !important;
+        #     }
+        # </style>
+        # """, unsafe_allow_html=True)
+
         col1, col2, col3 = st.columns(3)
+        progress_bar = st.progress(0)
+        # status_text = st.empty()
+
+        # with col1:
+        #     st.markdown("### 🧲 Step 1: Scrape Posts")
+        # with col2:
+        #     st.markdown("### 📝 Step 2: Get Captions") 
+        # with col3:
+        #     st.markdown("### 🧹 Step 3: Clean Data")
+        
+        # st.markdown("---")
+
+        # progress_bar = st.progress(0)
+        # status_text = st.empty()
 
         with col1:
-            st.info("Scraping posts...")
+            # st.info("Scraping posts...")
+            status_box_1 = st.empty()
+            status_box_1.text("Scraping posts...")
+            # status_text.text("Scraping posts...")
             try: 
-                print('endpoints', endpoints)
                 run_ingestion(keywords=keywords, endpoints=endpoints)
                 st.session_state.scraping_complete = True
-                st.success("Done scraping posts!")
+                progress_bar.progress(33)
+                status_box_1.success("Done scraping posts!")
             except Exception as e:
                 st.error(f"Error: {e}")
 
         with col2: 
-            st.info("Scraping captions...")
+            # st.info("Scraping captions...")
+            # status_text.text("Scraping captions...")
+            status_box_2 = st.empty()
+            status_box_2.text("Scraping posts...")
             try:
                 input_file_data = "output/forumscout_data.csv"
                 output_file_data = "output/forumscout_data_with_captions.csv"
                 enrich_captions(input_file_data, output_file_data)
                 st.session_state.captions_complete = True
-                st.success("Done scraping captions!")
+                progress_bar.progress(66)
+                status_box_2.success("Done scraping captions!")
             except Exception as e:
                 st.error(f"Error: {e}")
-
+            
         with col3: 
-            st.info("Cleaning captions...")
+            # st.info("Cleaning captions...")
+            # status_text.text("Cleaning captions...")
+            status_box_3 = st.empty()
+            status_box_3.text("Scraping posts...")
             try:
                 input_file_clean = "output/forumscout_data_with_captions.csv"
                 output_file_clean = "output/forumscout_cleaned_data.csv"
                 clean_captions_file(input_file=input_file_clean, output_file=output_file_clean, st=st)
                 st.session_state.cleaning_complete = True
-                st.success(f"Done cleaning captions!")
+                progress_bar.progress(100)
+                status_box_3.success(f"Done cleaning captions!")
             except Exception as e:
                 st.error(f"Error cleaning captions: {e}")
+                    
+            # st.success("Scraping complete.")
 
-        # Generate summaries
-        with st.spinner("Generating summaries from content..."):
-            try: 
-                summaries = generate_chunked_summaries()
-                chunk_count = len(summaries)
-                st.session_state.summaries = summaries
-                st.success("Chunked summaries generated!")
-            except Exception as e:
-                st.error(f"Error generating summaries by chunk: {e}")
-
-        # Generate final narratives
-        try:
-            all_chunks_text = ''
-            with open("output/gpt_narrative_summary.md", "r", encoding="utf-8") as f:
-                all_chunks_text = f.read()
-
-            with st.spinner("Analyzing summaries and generating final narratives..."):
-                final_output = synthesize_final_narratives(all_chunks_text)
-                st.session_state.final_narratives = final_output
-            
-            with open("output/final_narratives.md", "w", encoding="utf-8") as f:
-                f.write(final_output)
-
-            st.session_state.analysis_complete = True
-            st.success("Analysis complete!")
-
-        except FileNotFoundError:
-            st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
+# if st.button("💡 Generate Summaries"):
+    # Generate summaries
+    with st.spinner("Generating summaries from content..."):
+        try: 
+            summaries = generate_chunked_summaries()
+            chunk_count = len(summaries)
+            st.session_state.summaries = summaries
+            st.success("Chunked summaries generated!")
         except Exception as e:
-            st.error(f"Unexpected error: {e}")
+            st.error(f"Error generating summaries by chunk: {e}")
+
+    # Generate final narratives
+    try:
+        all_chunks_text = ''
+        with open("output/gpt_narrative_summary.md", "r", encoding="utf-8") as f:
+            all_chunks_text = f.read()
+
+        with st.spinner("Analyzing summaries and generating final narratives..."):
+            final_output = synthesize_final_narratives(all_chunks_text)
+            st.session_state.final_narratives = final_output
+        
+        with open("output/final_narratives.md", "w", encoding="utf-8") as f:
+            f.write(final_output)
+
+        st.session_state.analysis_complete = True
+        st.success("Analysis complete!")
+
+    except FileNotFoundError:
+        st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
+    except Exception as e:
+        st.error(f"Unexpected error: {e}")
 
 # Show download buttons and results if scraping is complete
 if st.session_state.scraping_complete:
@@ -169,31 +191,31 @@ if st.session_state.scraping_complete:
         except FileNotFoundError:
             st.warning("Raw data file not found")
 
-if st.session_state.captions_complete:
-    with col2:
-        try:
-            with open("output/forumscout_data_with_captions.csv", "rb") as f:
-                st.download_button(
-                    label="📄 Download Captions CSV", 
-                    data=f.read(),
-                    file_name="forumscout_data_with_captions.csv",
-                    key="download_captions_data"
-                )
-        except FileNotFoundError:
-            st.warning("Captions file not found")
+    if st.session_state.captions_complete:
+        with col2:
+            try:
+                with open("output/forumscout_data_with_captions.csv", "rb") as f:
+                    st.download_button(
+                        label="📄 Download Captions CSV", 
+                        data=f.read(),
+                        file_name="forumscout_data_with_captions.csv",
+                        key="download_captions_data"
+                    )
+            except FileNotFoundError:
+                st.warning("Captions file not found")
 
-if st.session_state.cleaning_complete:
-    with col3:
-        try:
-            with open("output/forumscout_cleaned_data.csv", "rb") as f:
-                st.download_button(
-                    label="📄 Download Cleaned CSV", 
-                    data=f.read(),
-                    file_name="forumscout_cleaned_data.csv",
-                    key="download_cleaned_data"
-                )
-        except FileNotFoundError:
-            st.warning("Cleaned data file not found")
+    if st.session_state.cleaning_complete:
+        with col3:
+            try:
+                with open("output/forumscout_cleaned_data.csv", "rb") as f:
+                    st.download_button(
+                        label="📄 Download Cleaned CSV", 
+                        data=f.read(),
+                        file_name="forumscout_cleaned_data.csv",
+                        key="download_cleaned_data"
+                    )
+            except FileNotFoundError:
+                st.warning("Cleaned data file not found")
 
 # Show summaries if available
 if st.session_state.summaries:
