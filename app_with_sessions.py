@@ -6,6 +6,7 @@ from project_code.summarize_chunks import generate_chunked_summaries
 from project_code.summaries import synthesize_final_narratives
 from utils.logger import log_to_browser
 import os
+from datetime import datetime
 
 # Initialize session state
 if 'analysis_complete' not in st.session_state:
@@ -20,6 +21,12 @@ if 'summaries' not in st.session_state:
     st.session_state.summaries = []
 if 'final_narratives' not in st.session_state:
     st.session_state.final_narratives = ""
+if 'selected_platforms' not in st.session_state:
+    st.session_state.selected_platforms = []
+if 'sort_by_recent' not in st.session_state:
+    st.session_state.sort_by = False
+if 'recency' not in st.session_state:
+    st.session_state.recency = False
 
 st.set_page_config(
     page_title="Narrative Analysis Tool",
@@ -30,6 +37,7 @@ st.set_page_config(
 st.title("📱 Narrative Analysis Tool")
 st.markdown("Enter keywords you'd like to search:")
 user_input = st.text_area("Keywords (comma-separated)")
+
 
 platform_options = {
     "Instagram": "instagram_search",
@@ -42,8 +50,80 @@ platform_options = {
 
 selected_platforms = st.multiselect(
     "Which platforms would you like to explore?",
-    list(platform_options.keys())
+    list(platform_options.keys()),
 )
+
+if any(platform in selected_platforms for platform in ["Instagram", "TikTok", "Reddit Posts", "Reddit Comments"]):
+    st.session_state.sort_by = True
+else:
+    st.session_state.sort_by = False
+
+if any(platform in selected_platforms for platform in ["YouTube"]):
+    st.session_state.recency = True
+else:
+    st.session_state.recency = False
+
+selected_sort = None
+if st.session_state.sort_by:
+    selected_sort = st.selectbox(
+        "What would you like to sort by?",
+        ("Latest", "Most Popular"),
+        index=None,
+        placeholder="Selected sort method..."
+    )
+
+recency_selection = None
+if st.session_state.recency:
+    recency_display = {
+        0: "last hour",
+        1: "today",
+        2: "this week",
+        3: "this month",
+        4: "this year"
+    }
+    recency_values = {
+        0: "last_hour",
+        1: "today",
+        2: "this_week", 
+        3: "this_month",
+        4: "this_year"
+    }
+    selection = st.segmented_control(
+        "Recency of Posts",
+        options=recency_display.keys(),
+        format_func=lambda option: recency_display[option],
+        selection_mode="single",
+    )
+    if selection is not None:
+        recency_selection = recency_values[selection]
+
+print('recency_selection', recency_selection)
+
+# st.write(
+#     "Your selected option: "
+#     f"{None if selection is None else recency[selection]}"
+# )
+
+# recency = st.select_slider(
+#     "How long ago do you want to scrape from?",
+#     options=[
+#         "last hour",
+#         "last day",
+#         "last week",
+#         "last month"
+#     ],
+    
+# )
+# st.write("recency", recency)
+
+# recency = st.slider(
+#     "How long ago do you want to scrape from?",
+#     # min_value=None,
+#     max_value=datetime.now(),
+#     value=datetime(2025,8,7, 1, 30),
+#     format="MM/DD/YY - hh:mm",
+# )
+# st.write("recency", recency)
 
 chunk_count = 1
 
@@ -90,7 +170,7 @@ if st.button("🧲 Scrape Posts"):
             status_box_1.text("Scraping posts...")
             # status_text.text("Scraping posts...")
             try: 
-                run_ingestion(keywords=keywords, endpoints=endpoints)
+                run_ingestion(keywords=keywords, endpoints=endpoints, sort_by=selected_sort, recency=recency_selection)
                 st.session_state.scraping_complete = True
                 progress_bar.progress(33)
                 status_box_1.success("Done scraping posts!")
