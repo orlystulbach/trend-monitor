@@ -5,6 +5,7 @@ from project_code.caption_cleaning import clean_captions_file
 from project_code.summarize_chunks import generate_chunked_summaries
 from project_code.summaries import synthesize_final_narratives
 from utils.logger import log_to_browser
+import os
 
 # Initialize session state
 if 'analysis_complete' not in st.session_state:
@@ -66,23 +67,10 @@ if st.button("🧲 Scrape Posts"):
         print(f"Scraping {keywords} from {endpoints.keys()}")
         # log_to_browser(f"Scraping {keywords} from {endpoints.keys()}")
 
-        # st.markdown("""
-        # <style>
-        #     .stProgress > div > div > div > div {
-        #         margin-bottom: 0rem !important;
-        #     }
-        #     .element-container {
-        #         margin-bottom: 0rem !important;
-        #     }
-        #     div[data-testid="stVerticalBlock"] > div:empty {
-        #         display: none !important;
-        #     }
-        # </style>
-        # """, unsafe_allow_html=True)
-
-        col1, col2, col3 = st.columns(3)
         progress_bar = st.progress(0)
         # status_text = st.empty()
+
+        col1, col2, col3 = st.columns(3)
 
         # with col1:
         #     st.markdown("### 🧲 Step 1: Scrape Posts")
@@ -113,7 +101,7 @@ if st.button("🧲 Scrape Posts"):
             # st.info("Scraping captions...")
             # status_text.text("Scraping captions...")
             status_box_2 = st.empty()
-            status_box_2.text("Scraping posts...")
+            status_box_2.text("Scraping captions...")
             try:
                 input_file_data = "output/forumscout_data.csv"
                 output_file_data = "output/forumscout_data_with_captions.csv"
@@ -128,7 +116,7 @@ if st.button("🧲 Scrape Posts"):
             # st.info("Cleaning captions...")
             # status_text.text("Cleaning captions...")
             status_box_3 = st.empty()
-            status_box_3.text("Scraping posts...")
+            status_box_3.text("Cleaning captions...")
             try:
                 input_file_clean = "output/forumscout_data_with_captions.csv"
                 output_file_clean = "output/forumscout_cleaned_data.csv"
@@ -141,43 +129,11 @@ if st.button("🧲 Scrape Posts"):
                     
             # st.success("Scraping complete.")
 
-# if st.button("💡 Generate Summaries"):
-    # Generate summaries
-    with st.spinner("Generating summaries from content..."):
-        try: 
-            summaries = generate_chunked_summaries()
-            chunk_count = len(summaries)
-            st.session_state.summaries = summaries
-            st.success("Chunked summaries generated!")
-        except Exception as e:
-            st.error(f"Error generating summaries by chunk: {e}")
-
-    # Generate final narratives
-    try:
-        all_chunks_text = ''
-        with open("output/gpt_narrative_summary.md", "r", encoding="utf-8") as f:
-            all_chunks_text = f.read()
-
-        with st.spinner("Analyzing summaries and generating final narratives..."):
-            final_output = synthesize_final_narratives(all_chunks_text)
-            st.session_state.final_narratives = final_output
-        
-        with open("output/final_narratives.md", "w", encoding="utf-8") as f:
-            f.write(final_output)
-
-        st.session_state.analysis_complete = True
-        st.success("Analysis complete!")
-
-    except FileNotFoundError:
-        st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
-    except Exception as e:
-        st.error(f"Unexpected error: {e}")
+col1, col2, col3 = st.columns(3)
 
 # Show download buttons and results if scraping is complete
 if st.session_state.scraping_complete:
-    st.subheader("📥 Download Data Files")
-    
-    col1, col2, col3 = st.columns(3)
+    # st.subheader("📥 Download Data Files")
     
     with col1:
         try:
@@ -191,55 +147,87 @@ if st.session_state.scraping_complete:
         except FileNotFoundError:
             st.warning("Raw data file not found")
 
-    if st.session_state.captions_complete:
-        with col2:
-            try:
-                with open("output/forumscout_data_with_captions.csv", "rb") as f:
-                    st.download_button(
-                        label="📄 Download Captions CSV", 
-                        data=f.read(),
-                        file_name="forumscout_data_with_captions.csv",
-                        key="download_captions_data"
-                    )
-            except FileNotFoundError:
-                st.warning("Captions file not found")
+if st.session_state.captions_complete:
+    with col2:
+        try:
+            with open("output/forumscout_data_with_captions.csv", "rb") as f:
+                st.download_button(
+                    label="📄 Download Captions CSV", 
+                    data=f.read(),
+                    file_name="forumscout_data_with_captions.csv",
+                    key="download_captions_data"
+                )
+        except FileNotFoundError:
+            st.warning("Captions file not found")
 
-    if st.session_state.cleaning_complete:
-        with col3:
-            try:
-                with open("output/forumscout_cleaned_data.csv", "rb") as f:
-                    st.download_button(
-                        label="📄 Download Cleaned CSV", 
-                        data=f.read(),
-                        file_name="forumscout_cleaned_data.csv",
-                        key="download_cleaned_data"
-                    )
-            except FileNotFoundError:
-                st.warning("Cleaned data file not found")
+if st.session_state.cleaning_complete:
+    with col3:
+        try:
+            with open("output/forumscout_cleaned_data.csv", "rb") as f:
+                st.download_button(
+                    label="📄 Download Cleaned CSV", 
+                    data=f.read(),
+                    file_name="forumscout_cleaned_data.csv",
+                    key="download_cleaned_data"
+                )
+        except FileNotFoundError:
+            st.warning("Cleaned data file not found")
 
-# Show summaries if available
-if st.session_state.summaries:
-    st.subheader("🧠 Generated Summaries")
+if st.button("💡 Generate Summaries"):
+    # Generate summaries
+    with st.spinner("Generating summaries from content..."):
+        try: 
+            summaries = generate_chunked_summaries()
+            chunk_count = len(summaries)
+            st.session_state.summaries = summaries
+            st.success("Chunked summaries generated!")
+        except Exception as e:
+            st.error(f"Error generating summaries by chunk: {e}")
     
-    if chunk_count > 1:
-        for i, summary in enumerate(st.session_state.summaries, start=1):
-            st.markdown(f"### Chunk Summary {i}")
-            st.text_area("", summary, height=300, key=f"summary_{i}")
-    else:
-        for i, summary in enumerate(st.session_state.summaries, start=1):
-            st.markdown(f"### Chunk Summary")
-            st.text_area("", summary, height=300, key=f"summary_{i}")
-    
-    try:
-        with open("output/gpt_narrative_summary.md", "rb") as f:
-            st.download_button(
-                label="📄 Download Chunk Summaries", 
-                data=f.read(),
-                file_name="gpt_narrative_summary.md",
-                key="download_summaries"
-            )
-    except FileNotFoundError:
-        st.warning("Summary file not found")
+    # Show summaries if available
+    if st.session_state.summaries:
+        st.subheader("🧠 Generated Summaries")
+        
+        if chunk_count > 1:
+            for i, summary in enumerate(st.session_state.summaries, start=1):
+                st.markdown(f"### Chunk Summary {i}")
+                st.text_area("", summary, height=300, key=f"summary_{i}")
+        else:
+            for i, summary in enumerate(st.session_state.summaries, start=1):
+                st.markdown(f"### Chunk Summary")
+                st.text_area("", summary, height=300, key=f"summary_{i}")
+        
+        try:
+            with open("output/gpt_narrative_summary.md", "rb") as f:
+                st.download_button(
+                    label="📄 Download Chunk Summaries", 
+                    data=f.read(),
+                    file_name="gpt_narrative_summary.md",
+                    key="download_summaries"
+                )
+        except FileNotFoundError:
+            st.warning("Summary file not found")
+
+        # Generate final narratives
+        try:
+            all_chunks_text = ''
+            with open("output/gpt_narrative_summary.md", "r", encoding="utf-8") as f:
+                all_chunks_text = f.read()
+
+            with st.spinner("Analyzing summaries and generating final narratives..."):
+                final_output = synthesize_final_narratives(all_chunks_text)
+                st.session_state.final_narratives = final_output
+            
+            with open("output/final_narratives.md", "w", encoding="utf-8") as f:
+                f.write(final_output)
+
+            st.session_state.analysis_complete = True
+            st.success("Analysis complete!")
+
+        except FileNotFoundError:
+            st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
+        except Exception as e:
+            st.error(f"Unexpected error: {e}")
 
 # Show final narratives if analysis is complete
 if st.session_state.analysis_complete:

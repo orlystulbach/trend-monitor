@@ -23,7 +23,7 @@ Your goals are:
    - Write a clear and concise **summary** (2 to 4 sentences) that captures the core idea, tone, and emotional resonance.
    - Select **5 to 10 example posts** that best illustrate the narrative, choosing from the references included in the original text. ALWAYS MAKE SURE TO INCLUDE the user, a short caption excerpt, a title excerpt where accessible, and the URL (very important to include the URL)!
 3. **Avoid duplication** — merge overlapping or semantically similar narratives into one.
-4. Ensure the output is **structured and readable**, suitable for inclusion in a research report.
+4. Ensure the output is **structured and readable**, suitable for inclusion in a research report. Please make sure the Narrative Title is bolded, the summary is on a new line, and the examples are on new lines.
 
 This is the structure I want:
 Narrative #: Title

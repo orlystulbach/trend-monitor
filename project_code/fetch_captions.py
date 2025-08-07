@@ -128,7 +128,8 @@ def enrich_captions(input_file, output_file):
             writer.writerow(row)
 
             progress_bar.progress((i + 1) / total, text=f"Processing {i+1} of {total}")
-    
+
+        progress_bar.empty()
         # log_to_browser("Caption enrichment complete!")
         print(f"✅ Captions added. Enriched data saved to {output_file}")
 
