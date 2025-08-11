@@ -1,0 +1,51 @@
+name: Weekly Report
+
+on:
+  # push:
+  #   branches:
+  #     - emailing
+  # workflow_dispatch: {}
+  schedule:
+    - cron: "0 13 * * 1"
+    - cron: "0 14 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || true
+
+      - name: Send weekly report
+        id: send_report
+        env:
+          GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_SUBJECT: "Weekly Narrative Report"
+          REPORT_KEYWORDS: ${{ vars.REPORT_KEYWORDS }}
+          REPORT_PLATFORMS: ${{ vars.REPORT_PLATFORMS }}
+          REPORT_SORT_BY: ${{ vars.REPORT_SORT_BY }}
+          REPORT_RECENCY: ${{ vars.REPORT_RECENCY }}
+        run: python send_mail.py
+
+      - name: Email failure notice
+        if: failure()
+        env:
+          GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_SUBJECT: "Weekly Narrative Report"
+          # GitHub provides these automatically:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: python send_failure_mail.py
