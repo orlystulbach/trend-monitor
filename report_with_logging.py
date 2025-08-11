@@ -121,7 +121,7 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
     # 1) Ingest
     try:
         logger.info("Step 1: run_ingestion started")
-        run_ingestion(keywords=keywords, endpoints=endpoints, sort_by=sort_by, recency=recency)
+        run_ingestion(keywords=keywords, endpoints=endpoints, sort_by='Latest', recency=recency)
         logger.info("Step 1: run_ingestion finished")
     except Exception as e:
         logger.exception("Error during ingestion")
@@ -157,29 +157,36 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
     clean_info = _df_summary(CLEAN_CSV, "Cleaned CSV")
 
     # 4) Chunked summaries
-    try:
-        logger.info("Step 4: generate_chunked_summaries started")
-        summaries = generate_chunked_summaries()
-        with open(CHUNKS_MD, "w", encoding="utf-8") as f:
-            for s in summaries:
-                f.write(s.strip() + "\n\n---\n\n")
-        logger.info("Step 4: generate_chunked_summaries finished | chunks=%d", len(summaries))
-    except Exception:
-        logger.exception("Error generating chunked summaries")
-        with open(CHUNKS_MD, "w", encoding="utf-8") as f:
-            f.write("[No summaries generated due to error]\n")
+    clean_info = _df_summary(CLEAN_CSV, "Cleaned CSV")
+    if "⚠️" in clean_info or "❌" in clean_info:
+      logger.warning("Cleaned CSV empty or missing — skipping OpenAI steps")
+      final_output = "[Skipped — no data to summarize]"
+      FINAL_MD.write_text(final_output, encoding="utf-8")
+      return "<p>No data to summarize this week.</p>", attachments
+    else:
+      try:
+          logger.info("Step 4: generate_chunked_summaries started")
+          summaries = generate_chunked_summaries()
+          with open(CHUNKS_MD, "w", encoding="utf-8") as f:
+              for s in summaries:
+                  f.write(s.strip() + "\n\n---\n\n")
+          logger.info("Step 4: generate_chunked_summaries finished | chunks=%d", len(summaries))
+      except Exception:
+          logger.exception("Error generating chunked summaries")
+          with open(CHUNKS_MD, "w", encoding="utf-8") as f:
+              f.write("[No summaries generated due to error]\n")
 
-    # 5) Final narratives
-    try:
-        logger.info("Step 5: synthesize_final_narratives started")
-        all_chunks_text = CHUNKS_MD.read_text(encoding="utf-8")
-        final_output = synthesize_final_narratives(all_chunks_text)
-        FINAL_MD.write_text(final_output, encoding="utf-8")
-        logger.info("Step 5: synthesize_final_narratives finished | final chars=%d", len(final_output))
-    except Exception:
-        logger.exception("Error generating final narratives")
-        final_output = "[No final narrative generated due to error]"
-        FINAL_MD.write_text(final_output, encoding="utf-8")
+      # 5) Final narratives
+      try:
+          logger.info("Step 5: synthesize_final_narratives started")
+          all_chunks_text = CHUNKS_MD.read_text(encoding="utf-8")
+          final_output = synthesize_final_narratives(all_chunks_text)
+          FINAL_MD.write_text(final_output, encoding="utf-8")
+          logger.info("Step 5: synthesize_final_narratives finished | final chars=%d", len(final_output))
+      except Exception:
+          logger.exception("Error generating final narratives")
+          final_output = "[No final narrative generated due to error]"
+          FINAL_MD.write_text(final_output, encoding="utf-8")
 
     # Build HTML
     meta_html = "<br>".join([
