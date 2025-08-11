@@ -34,33 +34,76 @@ def fetch_instagram_captions(shortcode, loader):
 #         print(f"Failed to fetch title for {shortcode}: {e}")
 #         return None
 
-def fetch_youtube_title(shortcode):
+# def fetch_youtube_title(shortcode):
+#     try:
+#         # Optional: Load cookies if available
+#         cookies_path = Path("youtube_cookies.txt")
+#         ydl_opts = {"quiet": True}
+
+#         if cookies_path.exists():
+#             ydl_opts["cookiefile"] = str(cookies_path)
+#         else:
+#             print("[YouTube] No cookies file found — attempting public access")
+
+#         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+#             info_dict = ydl.extract_info(shortcode, download=False)
+#             return info_dict.get("title", "N/A")
+
+#     except yt_dlp.utils.DownloadError as e:
+#         # Specific yt-dlp error handling
+#         if "Sign in to confirm" in str(e):
+#             print(f"[YouTube] Login required for {shortcode} — skipping.")
+#         else:
+#             print(f"[YouTube] Failed to fetch title for {shortcode}: {e}")
+#         return None
+
+#     except Exception as e:
+#         # Generic fallback
+#         print(f"[YouTube] Unexpected error for {shortcode}: {e}")
+#         return None
+
+def fetch_youtube_title(url_or_id: str, cookies_path: str | None = None) -> str | None:
+    """
+    Returns the YouTube video title or None if unavailable.
+    In CI, pass a cookies file path (e.g., 'youtube_cookies.txt') restored from a secret.
+    """
+    # Accept full URL or just the video ID
+    shortcode = url_or_id if "://" in url_or_id else f"https://www.youtube.com/watch?v={url_or_id}"
+
+    # Prefer explicit path, else default to repo root 'youtube_cookies.txt'
+    cookies_file = Path(cookies_path or "youtube_cookies.txt")
+
+    ydl_opts: dict = {
+        "quiet": True,
+        "noplaylist": True,
+        "skip_download": True,
+    }
+
+    if cookies_file.exists():
+        ydl_opts["cookiefile"] = str(cookies_file)
+    else:
+        print("[YouTube] No cookies file found — attempting public access")
+
     try:
-        # Optional: Load cookies if available
-        cookies_path = Path("youtube_cookies.txt")
-        ydl_opts = {"quiet": True}
-
-        if cookies_path.exists():
-            ydl_opts["cookiefile"] = str(cookies_path)
-        else:
-            print("[YouTube] No cookies file found — attempting public access")
-
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(shortcode, download=False)
-            return info_dict.get("title", "N/A")
+            info = ydl.extract_info(shortcode, download=False)
+            # Some URLs can resolve to entries; keep it defensive
+            if isinstance(info, dict):
+                return info.get("title") or info.get("webpage_url_basename") or "N/A"
+            return None
 
     except yt_dlp.utils.DownloadError as e:
-        # Specific yt-dlp error handling
-        if "Sign in to confirm" in str(e):
-            print(f"[YouTube] Login required for {shortcode} — skipping.")
-        else:
-            print(f"[YouTube] Failed to fetch title for {shortcode}: {e}")
+        msg = str(e)
+        if "Sign in to confirm" in msg or "This video is only available for members" in msg:
+            print(f"[YouTube] Auth required for {shortcode} — skipping (provide cookies).")
+            return None
+        print(f"[YouTube] DownloadError for {shortcode}: {msg}")
         return None
 
     except Exception as e:
-        # Generic fallback
         print(f"[YouTube] Unexpected error for {shortcode}: {e}")
         return None
+
 
 def fetch_reddit_post(url):
     if not url.endswith(".json"):
