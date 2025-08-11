@@ -18,7 +18,7 @@ def main():
       <h2>Weekly Report: ❌ Failed</h2>
       <p>The scheduled job failed. Check logs here:<br>
       <a href="{run_url}">{run_url}</a></p>
-      <p>If this is an OpenAI billing issue, add funds or fix quota, then re-run the workflow.</p>
+      <p>If this is an OpenAI billing issue, add funds (here: https://platform.openai.com/settings/organization/billing/overview) or fix quota, then re-run the workflow.</p>
     </div>
     """
 

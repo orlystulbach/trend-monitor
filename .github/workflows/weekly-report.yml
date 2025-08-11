@@ -38,7 +38,13 @@ jobs:
           REPORT_RECENCY: ${{ vars.REPORT_RECENCY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python send_mail.py
-
+      - name: Upload run logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report-logs
+          path: output/weekly_report.log
+          if-no-files-found: warn
       - name: Email failure notice
         if: failure()
         env:
