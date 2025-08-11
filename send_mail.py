@@ -2,7 +2,7 @@ import os, ssl, smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from report import build_report
+from report_with_logging import build_report
 
 def _env_list(name, default=""):
     raw = os.environ.get(name, default)
