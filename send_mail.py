@@ -11,7 +11,7 @@ def _env_list(name, default=""):
 def main():
     # Inputs come from environment (can be tuned in Actions)
     keywords = _env_list("REPORT_KEYWORDS", "")     # e.g., "israel, campus protest"
-    platforms = _env_list("REPORT_PLATFORMS", "TikTok")
+    platforms = _env_list("REPORT_PLATFORMS")
     sort_by = os.environ.get("REPORT_SORT_BY")      # "Latest" | "Most Popular" | None
     recency = os.environ.get("REPORT_RECENCY")      # "last_hour"|"today"|"this_week"|"this_month"|"this_year"|None
 
