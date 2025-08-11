@@ -30,14 +30,15 @@ BASE_URL = "https://forumscout.app/api"
 #     "tiktok": "tiktok"
 # }
 
-def fetch_forumscout_data(endpoint, keyword):
+def fetch_forumscout_data(endpoint, keyword, sort_by=None, recency=None):
     url = f"{BASE_URL}/{endpoint}"
     headers = {
         "X-API-Key": FORUMSCOUT_API_KEY
     }
     params = {
         "keyword": keyword,
-        # "sort_by": recent
+        "sort_by": sort_by,
+        "upload_date": recency
     }
     response = requests.get(url, headers=headers, params=params)
     if response.status_code == 200:
@@ -87,19 +88,35 @@ def safe_read_csv(path):
         pass
     return None  # return None if file is empty or invalid
 
-def run_ingestion(keywords, endpoints, output_file="output/forumscout_data.csv"):
+def run_ingestion(keywords, endpoints, sort_by=None, recency=None, output_file="output/forumscout_data.csv"):
     all_records = []
     temp_file = 'output/forumscout_data_temp.csv'
     open("output/tiktok_data.csv", "w").close() # Clears tiktok file
 
     for platform, endpoint in endpoints.items():
         if platform == 'tiktok':
-            scrape_tiktok_data(APIFY_CLIENT_TOKEN, keywords)
+            scrape_tiktok_data(APIFY_CLIENT_TOKEN, keywords, sort_by, recency)
         else:
             for keyword in keywords:
                 print(f"🔎 Fetching '{keyword}' from {platform}...")
                 # log_to_browser(f"🔎 Fetching '{keyword}' from {platform}...")
-                posts = fetch_forumscout_data(endpoint, keyword)
+                if sort_by is not None:
+                    if sort_by == "Latest":
+                        if platform == "instagram":
+                            sort_by = "recent"
+                        elif platform == "reddit_posts":
+                            sort_by = "new"
+                        elif platform == "reddit_comments":
+                            sort_by = "created_utc"
+                    else: # It was sorted by popularity
+                        if platform == "instagram" or platform == "reddit_posts":
+                            sort_by = "top"
+                        elif platform == "reddit_comments":
+                            sort_by = "score"
+                if recency is not None:
+                    recency.replace(" ", "_")
+                    print(recency)
+                posts = fetch_forumscout_data(endpoint, keyword, sort_by, recency)
                 normalized = [normalize_result(p, platform, keyword) for p in posts]
                 all_records.extend(normalized)
                 time.sleep(1)  # avoid rate limits

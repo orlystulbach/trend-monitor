@@ -1,10 +1,16 @@
 from apify_client import ApifyClient
 import csv
 from utils.logger import log_to_browser
+from datetime import datetime
 
-def scrape_tiktok_data(apify_token, keywords: list, output_file = 'output/tiktok_data.csv'):
+def scrape_tiktok_data(apify_token, keywords: list, sort_by="latest", recency=None, output_file = 'output/tiktok_data.csv'):
   # Initialize the ApifyClient with your API token
   client = ApifyClient(apify_token)
+
+  current = datetime.now()
+
+  if sort_by == 'Most Popular':
+     sort_by = 'popular'
 
   # Prepare CSV file
   with open(output_file, mode="w", newline="", encoding="utf-8") as csvfile:
@@ -18,6 +24,7 @@ def scrape_tiktok_data(apify_token, keywords: list, output_file = 'output/tiktok
         run_input = {
             "hashtags": [keyword],
             "resultsPerPage": 25,
+            "profileSorting": sort_by,
             "proxyCountryCode": "None",
         }
 
