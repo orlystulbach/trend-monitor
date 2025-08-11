@@ -36,6 +36,7 @@ jobs:
           REPORT_PLATFORMS: ${{ vars.REPORT_PLATFORMS }}
           REPORT_SORT_BY: ${{ vars.REPORT_SORT_BY }}
           REPORT_RECENCY: ${{ vars.REPORT_RECENCY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python send_mail.py
 
       - name: Email failure notice
