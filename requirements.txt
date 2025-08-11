@@ -9,3 +9,5 @@ dotenv
 apify-client
 yt_dlp
 bs4
+yagmail
+pathlib
