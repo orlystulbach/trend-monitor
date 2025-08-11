@@ -38,11 +38,19 @@ def scrape_tiktok_data(apify_token, keywords: list, sort_by="latest", recency=No
           dataset_items = client.dataset(dataset_id).iterate_items()
 
           for item in dataset_items:
+              author_meta = item.get("authorMeta") or {}
+              author = (
+                  author_meta.get("name") or          # handle/username
+                  author_meta.get("uniqueId") or      # sometimes used
+                  author_meta.get("nickName") or ""   # display name fallback
+              )
+
               writer.writerow({
                   "platform": "tiktok",
                   "keyword": keyword,
                   "content": item.get("text", ""),  # video description/caption
-                  "author": item.get("authorMeta.name", {}).get("name", ""),  # username
+                  # "author": item.get("authorMeta.name", {}).get("name", ""),  # username
+                  "author": author,
                   "timestamp": item.get("createTimeISO", ""),  # ISO timestamp
                   "url": item.get("webVideoUrl", ""),  # video URL
               })
