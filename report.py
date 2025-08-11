@@ -104,13 +104,15 @@ def build_report(
   ]
   meta_html = "<br>".join(meta_lines)
 
+  final_output_html = final_output.replace("\n", "<br>")
+
   html = f"""
     <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
       <h2>Weekly Narrative Report</h2>
       <p>{meta_html}</p>
       <h3>Final Narrative Analysis</h3>
       <div style="white-space:pre-wrap; border:1px solid #eee; padding:12px; border-radius:8px; background:#fafafa;">
-        {final_output.replace('\n', '<br>')}
+        {final_output_html}
       </div>
       <p style="margin-top:16px;">Attachments include raw, captions, cleaned CSVs, and chunk summaries (MD), if enabled.</p>
     </div>
