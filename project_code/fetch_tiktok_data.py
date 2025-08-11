@@ -19,7 +19,7 @@ def scrape_tiktok_data(apify_token, keywords: list, sort_by="latest", recency=No
 
       for keyword in keywords:
         # Prepare the Actor input
-        print(f"🔎 Fetching '{keyword}' from TikTok...")
+        print(f"🔎 Fetching '{keyword}' from TikTok based on {sort_by}...")
 
         run_input = {
             "hashtags": [keyword],
