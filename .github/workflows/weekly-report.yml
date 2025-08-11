@@ -25,7 +25,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt || true
       - name: Restore YouTube cookies
-        run: echo "${{ secrets.YOUTUBE_COOKIES_B64 }}" | base64 --decode > youtube_cookies.txt        
+        run: |
+          cat > youtube_cookies.txt <<'EOF'
+          ${{ secrets.YOUTUBE_COOKIES_TXT }}
+          EOF
+          test -s youtube_cookies.txt || (echo "cookies file is empty" && exit 1)
+          head -1 youtube_cookies.txt || true
+          wc -c youtube_cookies.txt || true        
       - name: Send weekly report
         id: send_report
         env:

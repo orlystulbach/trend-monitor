@@ -178,7 +178,7 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
       logger.warning("Cleaned CSV empty or missing — skipping OpenAI steps")
       final_output = "[Skipped — no data to summarize]"
       FINAL_MD.write_text(final_output, encoding="utf-8")
-      return "<p>No data to summarize this week.</p>", attachments
+      return "<p>No data to summarize this week.</p>"
     else:
       try:
           logger.info("Step 4: generate_chunked_summaries started")
