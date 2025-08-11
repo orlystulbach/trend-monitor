@@ -5,3 +5,5 @@ __pycache__/
 *.csv
 *.md
 .streamlit/secrets.toml
+youtube_cookies.txt
+youtube_cookies_base64.txt
