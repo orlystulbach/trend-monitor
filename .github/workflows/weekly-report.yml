@@ -28,6 +28,9 @@ jobs:
       - name: Send weekly report
         id: send_report
         env:
+          FORUMSCOUT_API_KEY: ${{ secrets.FORUMSCOUT_API_KEY }}
+          APIFY_CLIENT_TOKEN: ${{ secrets.APIFY_CLIENT_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
@@ -36,7 +39,6 @@ jobs:
           REPORT_PLATFORMS: ${{ vars.REPORT_PLATFORMS }}
           REPORT_SORT_BY: ${{ vars.REPORT_SORT_BY }}
           REPORT_RECENCY: ${{ vars.REPORT_RECENCY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python send_mail.py
       - name: Upload run logs
         if: always()
