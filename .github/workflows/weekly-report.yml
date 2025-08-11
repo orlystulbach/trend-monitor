@@ -6,8 +6,10 @@ on:
   #     - emailing
   # workflow_dispatch: {}
   schedule:
-    - cron: "0 13 * * 1"
+    - cron: "0 13 * * 1" # Mondays 13:00 UTC (covers EDT)
     - cron: "0 14 * * 1"
+    - cron: "35 20 * * 1" # Mondays 4:35pm EDT
+    # - cron: "35 21 * * 1" # Mondays 4:35pm EST
   workflow_dispatch: {}
 
 jobs:
