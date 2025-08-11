@@ -262,7 +262,7 @@ if st.button("💡 Generate Summaries"):
             st.session_state.summaries = summaries
             st.success("Chunked summaries generated!")
         except Exception as e:
-            st.error(f"Error generating summaries by chunk: {e}")
+            st.error(f"Error generating summaries by chunk: {e}. Check https://platform.openai.com/settings/organization/billing/overview to ensure we have enough in our OpenAI API billing.")
     
     # Show summaries if available
     if st.session_state.summaries:
@@ -295,14 +295,16 @@ if st.button("💡 Generate Summaries"):
                 all_chunks_text = f.read()
 
             with st.spinner("Analyzing summaries and generating final narratives..."):
-                final_output = synthesize_final_narratives(all_chunks_text)
-                st.session_state.final_narratives = final_output
+                try: 
+                    final_output = synthesize_final_narratives(all_chunks_text)
+                    st.session_state.final_narratives = final_output
+                    st.session_state.analysis_complete = True
+                    st.success("Analysis complete!")
+                except Exception as e:
+                    st.error(f"Error generating final narratives: {e}. Check https://platform.openai.com/settings/organization/billing/overview to ensure we have enough in our OpenAI API billing.")
             
             with open("output/final_narratives.md", "w", encoding="utf-8") as f:
                 f.write(final_output)
-
-            st.session_state.analysis_complete = True
-            st.success("Analysis complete!")
 
         except FileNotFoundError:
             st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
