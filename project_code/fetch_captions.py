@@ -62,29 +62,38 @@ def fetch_instagram_captions(shortcode, loader):
 #         print(f"[YouTube] Unexpected error for {shortcode}: {e}")
 #         return None
 
-def fetch_youtube_title(url_or_id: str, cookies_path: str | None = None) -> str | None:
-    shortcode = url_or_id if "://" in url_or_id else f"https://www.youtube.com/watch?v={url_or_id}"
-    cookies_file = Path(cookies_path or "youtube_cookies.txt")
-    ydl_opts = {"quiet": True, "noplaylist": True, "skip_download": True}
 
-    if cookies_file.exists() and cookies_file.stat().st_size > 0:
-        print(f"[YouTube] Using cookies: {cookies_file} ({cookies_file.stat().st_size} bytes)")
-        ydl_opts["cookiefile"] = str(cookies_file)
-    else:
-        print("[YouTube] No cookies file found — attempting public access")
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(shortcode, download=False)
-            return info.get("title") if isinstance(info, dict) else None
-    except yt_dlp.utils.DownloadError as e:
-        if "Sign in to confirm" in str(e):
-            print(f"[YouTube] Auth required for {shortcode} — provide cookies.")
-            return None
-        print(f"[YouTube] DownloadError: {e}")
+# Using YouTube API Key
+def fetch_youtube_title(video_url: str) -> str | None:
+    """Fetch a YouTube video title via YouTube Data API v3."""
+    api_key = os.getenv("YOUTUBE_API_KEY")
+    if not api_key:
+        print("❌ YOUTUBE_API_KEY not set — skipping YouTube title fetch")
         return None
+
+    # Extract video ID from the URL
+    match = re.search(r"(?:v=|youtu\.be/)([A-Za-z0-9_-]{11})", video_url)
+    if not match:
+        print(f"❌ Invalid YouTube URL: {video_url}")
+        return None
+    video_id = match.group(1)
+
+    # Call the API
+    url = (
+        f"https://www.googleapis.com/youtube/v3/videos"
+        f"?part=snippet&id={video_id}&key={api_key}"
+    )
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        items = data.get("items", [])
+        if not items:
+            print(f"⚠️ No video found for ID {video_id}")
+            return None
+        return items[0]["snippet"]["title"]
     except Exception as e:
-        print(f"[YouTube] Unexpected error: {e}")
+        print(f"❌ Failed to fetch YouTube title: {e}")
         return None
 
 
