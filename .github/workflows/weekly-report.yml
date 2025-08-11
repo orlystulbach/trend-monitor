@@ -1,15 +1,9 @@
 name: Weekly Report
 
 on:
-  # push:
-  #   branches:
-  #     - emailing
-  # workflow_dispatch: {}
   schedule:
     - cron: "0 13 * * 1" # Mondays 13:00 UTC (covers EDT)
     - cron: "0 14 * * 1"
-    - cron: "35 20 * * 1" # Mondays 4:35pm EDT
-    # - cron: "35 21 * * 1" # Mondays 4:35pm EST
   workflow_dispatch: {}
 
 jobs:
@@ -33,7 +27,9 @@ jobs:
           EOF
           test -s youtube_cookies.txt || (echo "cookies file is empty" && exit 1)
           head -1 youtube_cookies.txt || true
-          wc -c youtube_cookies.txt || true        
+          wc -c youtube_cookies.txt || true  
+      - name: Validate yt-dlp cookies
+        run: yt-dlp --cookies youtube_cookies.txt -O "%(title)s" "https://www.youtube.com/watch?v=gjLAVWPtswU"      
       - name: Send weekly report
         id: send_report
         env:
