@@ -154,11 +154,27 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
     except Exception:
         logger.exception("Error during cleaning")
         CLEAN_CSV.write_text("error during cleaning")
+
     clean_info = _df_summary(CLEAN_CSV, "Cleaned CSV")
+    skip_openai = False
+
+    if "⚠️" in clean_info or "❌" in clean_info:
+      skip_openai = True
+    else:
+        try:
+            df_clean = pd.read_csv(CLEAN_CSV)
+            if "cleaned_caption" not in df_clean.columns:
+                logger.warning("'cleaned_caption' column missing — skipping OpenAI steps")
+                skip_openai = True
+            elif df_clean["cleaned_caption"].dropna().eq("").all():
+                logger.warning("'cleaned_caption' column is empty — skipping OpenAI steps")
+                skip_openai = True
+        except Exception as e:
+            logger.exception("Failed to read cleaned CSV for caption check")
+            skip_openai = True
 
     # 4) Chunked summaries
-    clean_info = _df_summary(CLEAN_CSV, "Cleaned CSV")
-    if "⚠️" in clean_info or "❌" in clean_info:
+    if skip_openai:
       logger.warning("Cleaned CSV empty or missing — skipping OpenAI steps")
       final_output = "[Skipped — no data to summarize]"
       FINAL_MD.write_text(final_output, encoding="utf-8")
