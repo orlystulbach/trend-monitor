@@ -95,6 +95,8 @@ def run_ingestion(keywords, endpoints, sort_by=None, recency=None, output_file="
 
     for platform, endpoint in endpoints.items():
         if platform == 'tiktok':
+            if sort_by == 'Latest':
+                sort_by = 'latest'
             scrape_tiktok_data(APIFY_CLIENT_TOKEN, keywords, sort_by, recency)
         else:
             for keyword in keywords:
