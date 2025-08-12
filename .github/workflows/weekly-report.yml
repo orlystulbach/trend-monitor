@@ -56,6 +56,16 @@ jobs:
           name: weekly-report-logs
           path: ${{ github.workspace }}/output/weekly_report.log
           if-no-files-found: warn
+      - name: Upload enriched captions CSV
+        uses: actions/upload-artifact@v4
+        with:
+          name: enriched-captions
+          path: output/forumscout_data_with_captions.csv   
+      - name: Upload output folder
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-output
+          path: output/
       - name: Email failure notice
         if: failure()
         env:
