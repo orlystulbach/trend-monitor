@@ -183,10 +183,12 @@ def enrich_captions(input_file, output_file):
                 title, body = fetch_reddit_post(row["url"])
                 row["caption"] = title
                 row["body"] = body
+                row["caption"] = row["content"]
             elif row["platform"] == "reddit_comments" and row["url"]:
-                comment_text, author = fetch_reddit_comment(row["url"])
-                row["author"] = author
-                row["caption"] = comment_text
+                # comment_text, author = fetch_reddit_comment(row["url"])
+                # row["author"] = author
+                # row["caption"] = comment_text
+                row["caption"] = row["content"]
             elif row["platform"] == "twitter" and row["url"]:
                 row["caption"] = row["content"]
             elif row["platform"] == "tiktok" and row["content"]:
