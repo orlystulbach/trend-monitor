@@ -12,8 +12,8 @@ def generate_chunked_summaries(
     # === CONFIGURATION ===
   INPUT_FILE = "output/forumscout_cleaned_data.csv",
   OUTPUT_FILE = "output/gpt_narrative_summary.md",
-  CHUNK_SIZE = 30,
-  OPENAI_MODEL = "gpt-4"
+  CHUNK_SIZE = 20,
+  OPENAI_MODEL = "gpt-4o-mini"
   # OPENAI_MODEL = "gpt-3_5-turbo-instruct"
 ):
 
