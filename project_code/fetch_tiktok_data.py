@@ -2,12 +2,16 @@ from apify_client import ApifyClient
 import csv
 from utils.logger import log_to_browser
 from datetime import datetime
+from pathlib import Path
 
-def scrape_tiktok_data(apify_token, keywords: list, sort_by="latest", recency=None, output_file = 'output/tiktok_data.csv'):
+BASE_DIR = Path(__file__).resolve().parent.parent  # go up to project root
+OUTPUT_DIR = BASE_DIR / "output"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+TIKTOK_CSV = OUTPUT_DIR / "tiktok_data.csv"
+
+def scrape_tiktok_data(apify_token, keywords: list, sort_by="latest", recency=None, output_file = str(TIKTOK_CSV)):
   # Initialize the ApifyClient with your API token
   client = ApifyClient(apify_token)
-
-  current = datetime.now()
 
   if sort_by == 'Most Popular':
      sort_by = 'popular'
