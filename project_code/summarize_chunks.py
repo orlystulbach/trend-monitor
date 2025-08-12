@@ -2,16 +2,23 @@ import openai
 import pandas as pd
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Load environment variables
 load_dotenv()
 
 client = openai.OpenAI()
 
+BASE_DIR = Path(__file__).resolve().parent.parent  # go up to project root
+OUTPUT_DIR = BASE_DIR / "output"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+CLEAN_CSV    = OUTPUT_DIR / "forumscout_cleaned_data.csv"
+CHUNKS_MD    = OUTPUT_DIR / "gpt_narrative_summary.md"
+
 def generate_chunked_summaries(
     # === CONFIGURATION ===
-  INPUT_FILE = "output/forumscout_cleaned_data.csv",
-  OUTPUT_FILE = "output/gpt_narrative_summary.md",
+  INPUT_FILE = str(CLEAN_CSV),
+  OUTPUT_FILE = str(CHUNKS_MD),
   CHUNK_SIZE = 20,
   OPENAI_MODEL = "gpt-4o-mini"
   # OPENAI_MODEL = "gpt-3_5-turbo-instruct"

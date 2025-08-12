@@ -10,6 +10,10 @@ from bs4 import BeautifulSoup
 from utils.logger import log_to_browser
 from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent  # go up to project root
+OUTPUT_DIR = BASE_DIR / "output"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 # For Instaloader, need to extract shortcode from URL
 def extract_shortcode(url):
     match = re.search(r"/p/([A-Za-z0-9_-]+)", url)

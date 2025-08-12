@@ -1,11 +1,17 @@
 import openai
 import pandas as pd
 from dotenv import load_dotenv
+from pathlib import Path
 
 # Load environment variables
 load_dotenv()
 
 client = openai.OpenAI()
+
+BASE_DIR = Path(__file__).resolve().parent.parent  # go up to project root
+OUTPUT_DIR = BASE_DIR / "output"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+FINAL_MD = OUTPUT_DIR / "final_narratives.md"
 
 # all_chunks_text = ''
 
