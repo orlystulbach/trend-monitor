@@ -57,7 +57,7 @@ def normalize_result(post, platform, keyword):
     return {
         "platform": platform,
         "keyword": keyword,
-        "content": post.get("text") or post.get("content") or "",
+        "content": post.get("text") or post.get("content") or post.get('snippet') or "",
         "author": post.get("username") or post.get("author") or "",
         "timestamp": post.get("date") or post.get("published_at") or datetime.utcnow().isoformat(),
         "url": post.get("url") or post.get("link") or ""
