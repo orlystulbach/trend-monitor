@@ -276,7 +276,10 @@ def enrich_captions(input_file, output_file, st=None):
                 elif platform == "tiktok":
                     # Your TikTok pipeline already stores the caption/description in 'content'
                     row["caption"] = (row.get("content") or "").strip()
-
+                
+                elif row["platform"] == "twitter" and row["url"]:
+                    row["caption"] = row["content"]
+                    
                 else:
                     row["caption"] = row.get("caption", "") or ""
 
