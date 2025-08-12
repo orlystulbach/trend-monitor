@@ -90,6 +90,21 @@ def _df_head_html(path: Path, max_rows=5):
     except Exception:
         return "<em>(unable to render preview)</em>"
 
+def _collect_attachments():
+    files = [
+        ("forumscout_data.csv", RAW_CSV),
+        ("forumscout_data_with_captions.csv", CAPTIONS_CSV),
+        ("forumscout_cleaned_data.csv", CLEAN_CSV),
+        ("gpt_narrative_summary.md", CHUNKS_MD),
+        ("final_narratives.md", FINAL_MD),
+        ("weekly_report.log", LOG_PATH),
+    ]
+    out = []
+    for name, path in files:
+        if path.exists():
+            out.append((name, path.read_bytes()))    
+    return out
+
 def build_report(keywords, selected_platforms, sort_by=None, recency=None, attach_files=True):
     logger.info("=== Weekly report run start ===")
     logger.info("Inputs | keywords=%s | platforms=%s | sort_by=%s | recency=%s",
@@ -178,7 +193,7 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
       logger.warning("Cleaned CSV empty or missing — skipping OpenAI steps")
       final_output = "[Skipped — no data to summarize]"
       FINAL_MD.write_text(final_output, encoding="utf-8")
-      return "<p>No data to summarize this week.</p>"
+      return "<p>No data to summarize this week.</p>", _collect_attachments()
     else:
       try:
           logger.info("Step 4: generate_chunked_summaries started")
@@ -245,17 +260,18 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
     logging.shutdown()
 
     # Attachments
-    attachments = []
-    if attach_files:
-        for filename, path in [
-            ("forumscout_data.csv", RAW_CSV),
-            ("forumscout_data_with_captions.csv", CAPTIONS_CSV),
-            ("forumscout_cleaned_data.csv", CLEAN_CSV),
-            ("gpt_narrative_summary.md", CHUNKS_MD),
-            ("final_narratives.md", FINAL_MD),
-            ("weekly_report.log", LOG_PATH),
-        ]:
-            if path.exists():
-                attachments.append((filename, path.read_bytes()))
+    # attachments = []
+    # if attach_files:
+    #     for filename, path in [
+    #         ("forumscout_data.csv", RAW_CSV),
+    #         ("forumscout_data_with_captions.csv", CAPTIONS_CSV),
+    #         ("forumscout_cleaned_data.csv", CLEAN_CSV),
+    #         ("gpt_narrative_summary.md", CHUNKS_MD),
+    #         ("final_narratives.md", FINAL_MD),
+    #         ("weekly_report.log", LOG_PATH),
+    #     ]:
+    #         if path.exists():
+    #             attachments.append((filename, path.read_bytes()))
 
+    attachments = _collect_attachments()
     return html, attachments
