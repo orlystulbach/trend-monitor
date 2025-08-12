@@ -268,10 +268,11 @@ def enrich_captions(input_file, output_file, st=None):
                     row["body"] = row.get("body", "") or ""  # or fill with something else if you fetch full text
 
                 elif platform == "reddit_comments" and url:
-                    comment_text, author = fetch_reddit_comment(url)
-                    if author:
-                        row["author"] = author
-                    row["caption"] = (comment_text or "").strip()
+                    # comment_text, author = fetch_reddit_comment(url)
+                    # if author:
+                    #     row["author"] = author
+                    # row["caption"] = (comment_text or "").strip()
+                    row["caption"] = (row.get("content") or row.get("snippet") or "").strip()
 
                 elif platform == "tiktok":
                     # Your TikTok pipeline already stores the caption/description in 'content'
