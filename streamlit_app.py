@@ -75,6 +75,10 @@ if any(platform in selected_platforms for platform in ["YouTube"]):
 else:
     st.session_state.recency = False
 
+if any(platform in selected_platforms for platform in ["Twitter"]):
+    st.badge("Twitter will not return the user but you can click on the provided URL to find their handle.", color="blue")
+
+
 selected_sort = None
 if st.session_state.sort_by:
     selected_sort = st.selectbox(
@@ -109,8 +113,6 @@ if st.session_state.recency:
     if selection is not None:
         recency_selection = recency_values[selection]
 
-print('recency_selection', recency_selection)
-
 chunk_count = 1
 
 # Step 1: Scrape data
@@ -144,6 +146,7 @@ if st.button("🧲 Scrape Posts"):
             status_box_1.text("Scraping posts...")
             # status_text.text("Scraping posts...")
             try: 
+                print(str(RAW_CSV))
                 run_ingestion(keywords=keywords, endpoints=endpoints, sort_by=selected_sort, recency=recency_selection, output_file=str(RAW_CSV))
                 st.session_state.scraping_complete = True
                 progress_bar.progress(33)
