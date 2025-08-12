@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from project_code.forum_scout_multiple import run_ingestion
-from project_code.fetch_captions import enrich_captions
+from email_project.email_fetch_captions import enrich_captions
 from project_code.caption_cleaning import clean_captions_file
 from project_code.summarize_chunks import generate_chunked_summaries
 from project_code.summaries import synthesize_final_narratives
