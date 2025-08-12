@@ -12,5 +12,5 @@ Uses OpenAI API Key to discover narratives and organize them, providing titles, 
 1. Fetch the data from each social media platform.
 2. If necessary, fetch the actual content using third-party tools.
 3. Clean all of the data.
-4. Summarize by chunks of 30 posts into different narratives.
+4. Summarize by chunks of 20 posts into different narratives.
 5. Summarize those summarized chunks into distinct narratives.
