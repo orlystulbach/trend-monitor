@@ -3,7 +3,8 @@ __pycache__/
 *.pyc
 *.json
 *.csv
-*.md
+final_narratives.md
+gpt_narrative_summary.md
 .streamlit/secrets.toml
 youtube_cookies.txt
 youtube_cookies_base64.txt
