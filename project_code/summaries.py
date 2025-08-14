@@ -20,20 +20,30 @@ FINAL_MD = OUTPUT_DIR / "final_narratives.md"
 
 def synthesize_final_narratives(summaries_text):
   final_prompt = f"""
-You are a social media analyst specializing in narrative research. You are given a combined collection of narrative summaries and post excerpts that reflect conversations about Gaza from Instagram captions. The summaries were originally generated in smaller batches, but your task is to treat them as one unified dataset.
+You are a social media analyst specializing in narrative research. You are given a combined collection of narrative summaries and post excerpts about Gaza from Instagram captions. These summaries were originally generated in smaller batches, but you must treat them as one unified dataset.
 
-Your goals are:
+Your task:
 
-1. **Identify and name each distinct narrative** or theme expressed across the entire dataset and combine similar ones. Please conclude with 3 distinct narratives and retain all examples within the narrative they were combined into.
-2. For each narrative:
-   - Write a clear and concise **summary** (2 to 4 sentences) that captures the core idea, tone, and emotional resonance.
-   - Select **5 to 10 example posts** that best illustrate the narrative, choosing from the references included in the original text. ALWAYS MAKE SURE TO INCLUDE the user, a short caption excerpt, a title excerpt where accessible, and the URL (very important to include the URL)!
-3. **Avoid duplication** — merge overlapping or semantically similar narratives into one.
-4. Ensure the output is **structured and readable**, suitable for inclusion in a research report. Please make sure the Narrative Title is bolded, the summary is on a new line, and the examples are on new lines.
+Identify and name exactly 3 distinct narratives by merging semantically similar or overlapping narratives from the dataset. Clearly explain each narrative's essence.
 
+When merging narratives:
+
+Combine only if they share core subject matter, emotional tone, and perspective.
+
+Keep all example posts from the merged narratives (do not drop or rewrite them, except to remove exact duplicates).
+
+For each narrative:
+
+Write a summary (2 to 4 sentences) that clearly conveys the key idea, emotional tone, and perspective.
+
+Provide 5 to 6 example posts that best illustrate the narrative.
+
+For each example, preserve the username, exact short excerpt of caption, and URL exactly as given. Do not change wording, punctuation, or spelling.
+
+Output must follow this structure exactly:
 This is the structure I want:
-Narrative #: Title
-Summary: Summary
+Narrative #: **Title**  
+Summary: [2–4 sentence summary]
 Examples:
 1. @user: "<short caption excerpt>" (<URL>)
 2. @user: "<short caption excerpt>" (<URL>)
