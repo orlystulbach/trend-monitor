@@ -165,17 +165,21 @@ def run_ingestion(keywords, endpoints, sort_by=None, recency=None, output_file=O
                 # log_to_browser(f"🔎 Fetching '{keyword}' from {platform}...")
                 if sort_by is not None:
                     if sort_by == "Latest":
-                        if platform == "instagram":
+                        if platform == "instagram_search":
                             sort_by = "recent"
                         elif platform == "reddit_posts":
                             sort_by = "new"
                         elif platform == "reddit_comments":
                             sort_by = "created_utc"
+                        elif platform == "x_search":
+                            sort_by = "Latest"
                     else: # It was sorted by popularity
                         if platform == "instagram" or platform == "reddit_posts":
                             sort_by = "top"
                         elif platform == "reddit_comments":
                             sort_by = "score"
+                        elif platform == "x_search":
+                            sort_by = "Top"
                 if recency is not None:
                     recency.replace(" ", "_")
                     print(recency)
