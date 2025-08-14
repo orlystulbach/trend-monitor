@@ -304,7 +304,8 @@ if st.session_state.analysis_complete:
     st.markdown(st.session_state.final_narratives)
 
 # Reset button to start over
-if st.session_state.analysis_complete or st.session_state.scraping_complete:
+if st.session_state.analysis_complete and st.session_state.scraping_complete:
+    st.markdown("If you would like to begin a new analysis, please click the button below.")
     if st.button("🔄 Start New Analysis"):
         # Reset all session state
         st.session_state.analysis_complete = False
