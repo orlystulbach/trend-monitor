@@ -72,6 +72,7 @@ jobs:
           GMAIL_USERNAME: ${{ secrets.GMAIL_USERNAME }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
+          FAIL_MAIL_TO: ${{ secrets.FAIL_MAIL_TO }}
           MAIL_SUBJECT: "Weekly Narrative Report"
           # GitHub provides these automatically:
           GITHUB_REPOSITORY: ${{ github.repository }}

@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 
 def main():
     from_addr = os.environ["GMAIL_USERNAME"]
-    to_addrs  = [x.strip() for x in os.environ["MAIL_TO"].split(",") if x.strip()]
+    to_addrs  = [x.strip() for x in os.environ["FAIL_MAIL_TO"].split(",") if x.strip()]
     subject   = os.environ.get("MAIL_SUBJECT", "Weekly Report") + " — FAILED"
 
     # GitHub context (for quick link to logs)
