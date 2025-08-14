@@ -43,7 +43,7 @@ For each example, preserve the username, exact short excerpt of caption, and URL
 Output must follow this structure exactly:
 This is the structure I want:
 Narrative #: **Title**  
-Summary: [2–4 sentence summary]
+Summary: [2 to 4 sentence summary]
 Examples:
 1. @user: "<short caption excerpt>" (<URL>)
 2. @user: "<short caption excerpt>" (<URL>)
@@ -52,6 +52,16 @@ Examples:
 5. @user: "<short caption excerpt>" (<URL>)
 
 Focus on understanding patterns, emotions, and frames of thought expressed by the public.
+
+Important rules:
+
+Keep all original examples unless they are true duplicates.
+
+Do not invent or modify URLs.
+
+Do not reorder within the examples unless necessary to group similar ones.
+
+Keep bolded titles and exact formatting.
 
 Here is the full combined content:
 \"\"\"
