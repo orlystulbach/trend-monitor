@@ -66,7 +66,7 @@ selected_platforms = st.multiselect(
     list(platform_options.keys()),
 )
 
-if any(platform in selected_platforms for platform in ["Instagram", "TikTok", "Reddit Posts", "Reddit Comments"]):
+if any(platform in selected_platforms for platform in ["Instagram", "TikTok", "Reddit Posts", "Reddit Comments", "Twitter"]):
     st.session_state.sort_by = True
 else:
     st.session_state.sort_by = False
@@ -230,64 +230,64 @@ if st.session_state.cleaning_complete:
         else:
             st.warning("Cleaned data file not found")
 
-if st.button("💡 Generate Summaries"):
-    # Generate summaries
-    with st.spinner("Generating summaries from content..."):
-        try: 
-            summaries = generate_chunked_summaries()
-            chunk_count = len(summaries)
-            st.session_state.summaries = summaries
-            st.success("Chunked summaries generated!")
-        except Exception as e:
-            st.error(f"Error generating summaries by chunk: {e}. Check https://platform.openai.com/settings/organization/billing/overview to ensure we have enough in our OpenAI API billing.")
-    
-    # Show summaries if available
-    if st.session_state.summaries:
-        st.subheader("🧠 Generated Summaries")
+    if st.button("💡 Generate Summaries"):
+        # Generate summaries
+        with st.spinner("Generating summaries from content..."):
+            try: 
+                summaries = generate_chunked_summaries()
+                chunk_count = len(summaries)
+                st.session_state.summaries = summaries
+                st.success("Chunked summaries generated!")
+            except Exception as e:
+                st.error(f"Error generating summaries by chunk: {e}. Check https://platform.openai.com/settings/organization/billing/overview to ensure we have enough in our OpenAI API billing.")
         
-        if chunk_count > 1:
-            for i, summary in enumerate(st.session_state.summaries, start=1):
-                st.markdown(f"### Chunk Summary {i}")
-                st.text_area("", summary, height=300, key=f"summary_{i}")
-        else:
-            for i, summary in enumerate(st.session_state.summaries, start=1):
-                st.markdown(f"### Chunk Summary")
-                st.text_area("", summary, height=300, key=f"summary_{i}")
-        
-        if CHUNKS_MD.exists():
-            with CHUNKS_MD.open("rb") as f:
-                st.download_button(
-                    label="📄 Download Chunk Summaries", 
-                    data=f.read(),
-                    file_name=CHUNKS_MD.name,
-                    key="download_summaries"
-                )
-        else:
-            st.warning("Summary file not found")
-
-        # Generate final narratives
-        if CHUNKS_MD.exists():
-            all_chunks_text = CHUNKS_MD.read_text(encoding="utf-8")
-            # with open("output/gpt_narrative_summary.md", "r", encoding="utf-8") as f:
-            #     all_chunks_text = f.read()
-
-            with st.spinner("Analyzing summaries and generating final narratives..."):
-                try: 
-                    final_output = synthesize_final_narratives(all_chunks_text)
-                    st.session_state.final_narratives = final_output
-                    st.session_state.analysis_complete = True
-                    st.success("Analysis complete!")
-                except Exception as e:
-                    st.error(f"Error generating final narratives: {e}. Check https://platform.openai.com/settings/organization/billing/overview to ensure we have enough in our OpenAI API billing.")
+        # Show summaries if available
+        if st.session_state.summaries:
+            st.subheader("🧠 Generated Summaries")
             
-            FINAL_MD.write_text(final_output, encoding="utf-8")
-            # with open("output/final_narratives.md", "w", encoding="utf-8") as f:
-            #     f.write(final_output)
+            if chunk_count > 1:
+                for i, summary in enumerate(st.session_state.summaries, start=1):
+                    st.markdown(f"### Chunk Summary {i}")
+                    st.text_area("", summary, height=300, key=f"summary_{i}")
+            else:
+                for i, summary in enumerate(st.session_state.summaries, start=1):
+                    st.markdown(f"### Chunk Summary")
+                    st.text_area("", summary, height=300, key=f"summary_{i}")
+            
+            if CHUNKS_MD.exists():
+                with CHUNKS_MD.open("rb") as f:
+                    st.download_button(
+                        label="📄 Download Chunk Summaries", 
+                        data=f.read(),
+                        file_name=CHUNKS_MD.name,
+                        key="download_summaries"
+                    )
+            else:
+                st.warning("Summary file not found")
 
-        else:
-            st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
-        # except Exception as e:
-            st.error(f"Unexpected error: {e}")
+            # Generate final narratives
+            if CHUNKS_MD.exists():
+                all_chunks_text = CHUNKS_MD.read_text(encoding="utf-8")
+                # with open("output/gpt_narrative_summary.md", "r", encoding="utf-8") as f:
+                #     all_chunks_text = f.read()
+
+                with st.spinner("Analyzing summaries and generating final narratives..."):
+                    try: 
+                        final_output = synthesize_final_narratives(all_chunks_text)
+                        st.session_state.final_narratives = final_output
+                        st.session_state.analysis_complete = True
+                        st.success("Analysis complete!")
+                    except Exception as e:
+                        st.error(f"Error generating final narratives: {e}. Check https://platform.openai.com/settings/organization/billing/overview to ensure we have enough in our OpenAI API billing.")
+                
+                FINAL_MD.write_text(final_output, encoding="utf-8")
+                # with open("output/final_narratives.md", "w", encoding="utf-8") as f:
+                #     f.write(final_output)
+
+            else:
+                st.error("❌ 'gpt_narrative_summary.md' not found. Run the chunk summarization step first.")
+            # except Exception as e:
+                st.error(f"Unexpected error: {e}")
 
 # Show final narratives if analysis is complete
 if st.session_state.analysis_complete:
