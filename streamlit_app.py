@@ -60,8 +60,9 @@ platform_options = {
     "Twitter": "x_search",
 }
 
+st.markdown("Select platforms you'd like to explore. I would advise choosing **one** platform at a time for the best data.")
 selected_platforms = st.multiselect(
-    "Which platforms would you like to explore?",
+    "Select platform(s)",
     list(platform_options.keys()),
 )
 
