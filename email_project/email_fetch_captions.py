@@ -24,45 +24,6 @@ def fetch_instagram_captions(shortcode):
     except Exception as e:
         print(f"Error fetching caption for {shortcode}: {e}")
         return ""
-    
-# def fetch_youtube_title(shortcode):
-#     try:
-#         with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
-#             info_dict = ydl.extract_info(shortcode, download=False)
-#             # log_to_browser(f"Fetching YouTube caption for {shortcode}")
-#             return info_dict.get('title', 'N/A')
-#     except Exception as e:
-#         print(f"Failed to fetch title for {shortcode}: {e}")
-#         return None
-
-# def fetch_youtube_title(shortcode):
-#     try:
-#         # Optional: Load cookies if available
-#         cookies_path = Path("youtube_cookies.txt")
-#         ydl_opts = {"quiet": True}
-
-#         if cookies_path.exists():
-#             ydl_opts["cookiefile"] = str(cookies_path)
-#         else:
-#             print("[YouTube] No cookies file found — attempting public access")
-
-#         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-#             info_dict = ydl.extract_info(shortcode, download=False)
-#             return info_dict.get("title", "N/A")
-
-#     except yt_dlp.utils.DownloadError as e:
-#         # Specific yt-dlp error handling
-#         if "Sign in to confirm" in str(e):
-#             print(f"[YouTube] Login required for {shortcode} — skipping.")
-#         else:
-#             print(f"[YouTube] Failed to fetch title for {shortcode}: {e}")
-#         return None
-
-#     except Exception as e:
-#         # Generic fallback
-#         print(f"[YouTube] Unexpected error for {shortcode}: {e}")
-#         return None
-
 
 # Using YouTube API Key
 def fetch_youtube_title(video_url: str) -> str | None:
@@ -96,23 +57,6 @@ def fetch_youtube_title(video_url: str) -> str | None:
     except Exception as e:
         print(f"❌ Failed to fetch YouTube title: {e}")
         return None
-
-
-# def fetch_reddit_post(url):
-#     if not url.endswith(".json"):
-#         url = url.rstrip("/") + ".json"
-#     headers = {'User-Agent': 'trend-monitor/0.1'}
-#     try:
-#         # log_to_browser(f"Fetching Reddit post for {url}")
-#         response = requests.get(url, headers=headers)
-#         data = response.json()
-#         post = data[0]['data']['children'][0]['data']
-#         title = post.get('title', '')
-#         body = post.get('selftext', '')
-#         return title, body
-#     except Exception as e:
-#         print(f"Error fetching title for Reddit post ({url}): {e}")
-#         return None, None
 
 def make_reddit_client():
     return praw.Reddit(
