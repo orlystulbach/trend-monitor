@@ -50,6 +50,7 @@ def generate_chunked_summaries(
   2. Write a 2 to 4 sentence summary for each narrative.
   3. Provide 5 to 10 example posts that reflect each narrative, and ALWAYS make sure to include the user, short caption excerpt, and the post URL (super important to include the URL!)!!!
      a. If the platform is Twitter, ignore the author listed in the table if it says "unknown" and try to find the user in the content or from the URL.
+     b. If you are working with multiple platforms, please include the platform in the example.
 
   Here are the posts:
   {formatted}
