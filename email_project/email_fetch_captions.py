@@ -15,10 +15,11 @@ def extract_shortcode(url):
     match = re.search(r"/p/([A-Za-z0-9_-]+)", url)
     return match.group(1) if match else None
 
-def fetch_instagram_captions(shortcode, loader):
+def fetch_instagram_captions(shortcode):
+    L = instaloader.Instaloader()
     try:
         # log_to_browser(f"Fetching Instagram caption for {shortcode}")
-        post = instaloader.Post.from_shortcode(loader.context, shortcode)
+        post = instaloader.Post.from_shortcode(L.context, shortcode)
         return post.caption
     except Exception as e:
         print(f"Error fetching caption for {shortcode}: {e}")
@@ -188,7 +189,7 @@ def enrich_captions(input_file, output_file, st=None):
             try:
                 if platform == "instagram" and url:
                     shortcode = extract_shortcode(url)
-                    row["caption"] = fetch_instagram_captions(shortcode, L) if shortcode else ""
+                    row["caption"] = fetch_instagram_captions(shortcode) if shortcode else ""
 
                 elif platform == "youtube" and url:
                     # Prefer API-based fetch in CI to avoid cookies hassle

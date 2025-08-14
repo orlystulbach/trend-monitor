@@ -163,10 +163,20 @@ def generate_chunked_summaries(
         df["platform"] = df.get("url", "").apply(_infer_platform_from_url)
 
     # Ensure required fields
-    for col in ("author", "url"):
-        if col not in df.columns:
-            df[col] = ""
-    df = df[["platform", "cleaned_caption", "author", "url"]].copy()
+    # for col in ("author", "url"):
+    #     if col not in df.columns:
+    #         df[col] = ""
+    # df = df[["platform", "cleaned_caption", "author", "url"]].copy()
+
+    cols = ["cleaned_caption", "author", "url"]
+
+    # ensure columns exist
+    for c in cols:
+        if c not in df.columns:
+            df[c] = ""
+
+    # make them true strings and remove NaNs/<NA>
+    df[cols] = df[cols].astype("string").fillna("")
 
     all_sections = []
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
