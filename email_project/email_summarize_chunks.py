@@ -56,22 +56,50 @@ def _extract_json(text: str) -> Dict[str, Any]:
             pass
     raise ValueError("Could not parse JSON from model output")
 
-def _render_markdown(platform_name: str, final_json: Dict[str, Any]) -> str:
-    lines = [f"## {platform_name} Narratives"]
-    for idx, n in enumerate(final_json.get("narratives", []), start=1):
-        name = n.get("name", f"Narrative {idx}")
+def _platform_display_name(p: str) -> str:
+    m = {
+        "instagram": "Instagram",
+        "tiktok": "TikTok",
+        "twitter": "Twitter",
+        "x": "Twitter",
+        "x_search": "Twitter",
+        "reddit": "Reddit",
+        "reddit_posts": "Reddit Posts",
+        "reddit_comments": "Reddit Comments",
+        "youtube": "YouTube",
+    }
+    p = (p or "").strip().lower()
+    return m.get(p, p.replace("_", " ").title())
+
+def _render_markdown(platform_name: str, final_json: dict) -> str:
+    title = _platform_display_name(platform_name)
+    lines = [f"{title}", "Narratives"]  # plain lines (no markdown ##)
+
+    narratives = final_json.get("narratives", [])
+    for idx, n in enumerate(narratives, start=1):
+        name = (n.get("name") or f"Narrative {idx}").strip()
         summary = (n.get("summary") or "").strip()
-        lines.append(f"### Narrative {idx}: {name}")
+
+        # Header exactly as requested
+        lines.append(f"# Narrative {idx}: {name}")
         if summary:
-            lines.append(f"**Summary:** {summary}\n")
-        lines.append("**Examples:**")
-        for ex in (n.get("examples", [])[:10]):  # cap to 10
-            handle = (ex.get("handle") or "@unknown").strip()
+            lines.append(f"Summary: {summary}")
+        lines.append("")  # blank line before Examples label
+
+        lines.append("Examples:")
+        examples = n.get("examples", [])[:10]  # cap to 10 examples
+        for ex in examples:
+            handle = (ex.get("handle") or "@unknown").strip() or "@unknown"
             excerpt = str(ex.get("excerpt", "")).strip().replace("\n", " ")
             url = (ex.get("url") or "").strip()
-            lines.append(f"- {handle}: \"{excerpt}\" ({url})")
-        lines.append("")  # spacing
-    return "\n".join(lines).strip() + "\n"
+            # keep quotes and URL formatting as in your sample
+            lines.append(f'- {handle}: "{excerpt}" ({url})')
+
+        # blank line between narratives
+        lines.append("")
+
+    # trailing newline for file friendliness
+    return "\n".join(lines).rstrip() + "\n"
 
 def _gpt_chunk(platform_name: str, posts_chunk: List[Dict[str, Any]], model: str, temp: float) -> Dict[str, Any]:
     formatted = "\n".join(_fmt_post(p) for p in posts_chunk)
@@ -161,12 +189,6 @@ def generate_chunked_summaries(
     # Ensure platform
     if "platform" not in df.columns:
         df["platform"] = df.get("url", "").apply(_infer_platform_from_url)
-
-    # Ensure required fields
-    # for col in ("author", "url"):
-    #     if col not in df.columns:
-    #         df[col] = ""
-    # df = df[["platform", "cleaned_caption", "author", "url"]].copy()
 
     cols = ["cleaned_caption", "author", "url"]
 

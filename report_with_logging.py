@@ -250,12 +250,6 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
       <div style="white-space:pre-wrap; border:1px solid #eee; padding:12px; border-radius:8px; background:#fafafa;">
         {final_output_html}
       </div>
-      <h3>Raw sample</h3>
-      {raw_preview}
-      <h3>Captions sample</h3>
-      {cap_preview}
-      <h3>Cleaned sample</h3>
-      {clean_preview}
     </div>
     """
 
