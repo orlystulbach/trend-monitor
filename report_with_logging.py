@@ -116,6 +116,7 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
     keywords = [kw.strip() for kw in (keywords or []) if kw.strip()]
     selected_platforms = [p.strip() for p in (selected_platforms or []) if p.strip()]
 
+    # Check to see if we are missing anything
     problems = []
     if not keywords:
         problems.append("No keywords provided.")
@@ -258,20 +259,6 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
     logger.info("=== Weekly report run end ===")
     # ensure file handlers flush for artifact/attachment
     logging.shutdown()
-
-    # Attachments
-    # attachments = []
-    # if attach_files:
-    #     for filename, path in [
-    #         ("forumscout_data.csv", RAW_CSV),
-    #         ("forumscout_data_with_captions.csv", CAPTIONS_CSV),
-    #         ("forumscout_cleaned_data.csv", CLEAN_CSV),
-    #         ("gpt_narrative_summary.md", CHUNKS_MD),
-    #         ("final_narratives.md", FINAL_MD),
-    #         ("weekly_report.log", LOG_PATH),
-    #     ]:
-    #         if path.exists():
-    #             attachments.append((filename, path.read_bytes()))
 
     attachments = _collect_attachments()
     return html, attachments
