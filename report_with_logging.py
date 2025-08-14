@@ -8,7 +8,7 @@ import pandas as pd
 from project_code.forum_scout_multiple import run_ingestion
 from email_project.email_fetch_captions import enrich_captions
 from project_code.caption_cleaning import clean_captions_file
-from project_code.summarize_chunks import generate_chunked_summaries
+from email_project.email_summarize_chunks import generate_chunked_summaries
 from project_code.summaries import synthesize_final_narratives
 
 # -------- logging setup --------
@@ -116,6 +116,7 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
     keywords = [kw.strip() for kw in (keywords or []) if kw.strip()]
     selected_platforms = [p.strip() for p in (selected_platforms or []) if p.strip()]
 
+    # Check to see if we are missing anything
     problems = []
     if not keywords:
         problems.append("No keywords provided.")
@@ -208,16 +209,16 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
               f.write("[No summaries generated due to error]\n")
 
       # 5) Final narratives
-      try:
-          logger.info("Step 5: synthesize_final_narratives started")
-          all_chunks_text = CHUNKS_MD.read_text(encoding="utf-8")
-          final_output = synthesize_final_narratives(all_chunks_text)
-          FINAL_MD.write_text(final_output, encoding="utf-8")
-          logger.info("Step 5: synthesize_final_narratives finished | final chars=%d", len(final_output))
-      except Exception:
-          logger.exception("Error generating final narratives")
-          final_output = "[No final narrative generated due to error]"
-          FINAL_MD.write_text(final_output, encoding="utf-8")
+    #   try:
+    #       logger.info("Step 5: synthesize_final_narratives started")
+    #       all_chunks_text = CHUNKS_MD.read_text(encoding="utf-8")
+    #       final_output = synthesize_final_narratives(all_chunks_text)
+    #       FINAL_MD.write_text(final_output, encoding="utf-8")
+    #       logger.info("Step 5: synthesize_final_narratives finished | final chars=%d", len(final_output))
+    #   except Exception:
+    #       logger.exception("Error generating final narratives")
+    #       final_output = "[No final narrative generated due to error]"
+    #       FINAL_MD.write_text(final_output, encoding="utf-8")
 
     # Build HTML
     meta_html = "<br>".join([
@@ -227,10 +228,13 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
         f"<b>Recency:</b> {recency or 'None'}",
         f"<b>Generated:</b> {datetime.now().strftime('%Y-%m-%d %H:%M')}",
     ])
+
+    # final_output_html = FINAL_MD.read_text(encoding="utf-8").replace("\n", "<br>")
+    final_output_html = CHUNKS_MD.read_text(encoding="utf-8").replace("\n", "<br>")
+
     raw_preview = _df_head_html(RAW_CSV)
     cap_preview = _df_head_html(CAPTIONS_CSV)
     clean_preview = _df_head_html(CLEAN_CSV)
-    final_output_html = FINAL_MD.read_text(encoding="utf-8").replace("\n", "<br>")
 
     html = f"""
     <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
@@ -242,36 +246,22 @@ def build_report(keywords, selected_platforms, sort_by=None, recency=None, attac
         <li>{cap_info}</li>
         <li>{clean_info}</li>
       </ul>
+      <h3>Final Narrative Analysis</h3>
+      <div style="white-space:pre-wrap; border:1px solid #eee; padding:12px; border-radius:8px; background:#fafafa;">
+        {final_output_html}
+      </div>
       <h3>Raw sample</h3>
       {raw_preview}
       <h3>Captions sample</h3>
       {cap_preview}
       <h3>Cleaned sample</h3>
       {clean_preview}
-      <h3>Final Narrative Analysis</h3>
-      <div style="white-space:pre-wrap; border:1px solid #eee; padding:12px; border-radius:8px; background:#fafafa;">
-        {final_output_html}
-      </div>
     </div>
     """
 
     logger.info("=== Weekly report run end ===")
     # ensure file handlers flush for artifact/attachment
     logging.shutdown()
-
-    # Attachments
-    # attachments = []
-    # if attach_files:
-    #     for filename, path in [
-    #         ("forumscout_data.csv", RAW_CSV),
-    #         ("forumscout_data_with_captions.csv", CAPTIONS_CSV),
-    #         ("forumscout_cleaned_data.csv", CLEAN_CSV),
-    #         ("gpt_narrative_summary.md", CHUNKS_MD),
-    #         ("final_narratives.md", FINAL_MD),
-    #         ("weekly_report.log", LOG_PATH),
-    #     ]:
-    #         if path.exists():
-    #             attachments.append((filename, path.read_bytes()))
 
     attachments = _collect_attachments()
     return html, attachments
