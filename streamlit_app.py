@@ -292,16 +292,16 @@ if st.session_state.cleaning_complete:
 # Show final narratives if analysis is complete
 if st.session_state.analysis_complete:
     st.subheader("📝 Final Narrative Analysis")
-    
+
+    st.markdown("### 🎯 Discovered Narratives")
+    st.markdown(st.session_state.final_narratives)
+
     st.download_button(
         label="📄 Download Final Narratives", 
         data=st.session_state.final_narratives,
         file_name=FINAL_MD.name,
         key="download_final_narratives"
     )
-
-    st.markdown("### 🎯 Discovered Narratives")
-    st.markdown(st.session_state.final_narratives)
 
 # Reset button to start over
 if st.session_state.analysis_complete or st.session_state.scraping_complete:

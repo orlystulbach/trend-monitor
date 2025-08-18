@@ -136,8 +136,9 @@ def enrich_captions(input_file, output_file):
 
         for i, row in enumerate(reader):
             if row["platform"] == "instagram" and row["url"]:
-                shortcode = extract_shortcode(row["url"])
-                row["caption"] = fetch_instagram_captions(shortcode, L) if shortcode else ""
+                # shortcode = extract_shortcode(row["url"])
+                # row["caption"] = fetch_instagram_captions(shortcode, L) if shortcode else ""
+                row["caption"] = row["content"]
             elif row["platform"] == "youtube" and row["url"]:
               row["caption"] = fetch_youtube_title(row["url"])
             elif row["platform"] == "reddit_posts" and row["url"]:
