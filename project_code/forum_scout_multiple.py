@@ -207,7 +207,7 @@ def map_sort_for_platform(platform: str, choice: str | None) -> str | None:
         "reddit_posts": "top",
         "reddit_comments": "score",
         "x_search": "Top",
-        "tiktok": "top"
+        "tiktok": "popular"
     }.get(platform, None)
 
 # ----------------------------
